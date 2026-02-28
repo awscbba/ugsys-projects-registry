@@ -1,0 +1,89 @@
+# ZAP Scan Rules Configuration
+# Format: rule_id	action	# description
+# Actions: IGNORE, WARN, FAIL
+# Source: aligned with devsecops-poc + extras for REST/JWT APIs
+
+# ── IGNORE — known false positives for this API ──────────────────────────────
+10010	IGNORE	# Cookie No HttpOnly Flag (CSRF double-submit cookie must be JS-readable)
+10015	IGNORE	# Incomplete or No Cache-control Header (handled by SecurityHeadersMiddleware)
+10021	IGNORE	# X-Content-Type-Options Header Missing (we set it in SecurityHeadersMiddleware)
+10036	IGNORE	# Server Leaks Version Information (Server header removed by middleware)
+10038	IGNORE	# CSP Header Not Set (only on WAF 403 block pages we can't control)
+10049	IGNORE	# Non-Storable Content (expected for API responses)
+10055	IGNORE	# CSP: Wildcard Directive (we have strict CSP for API)
+10063	IGNORE	# Permissions Policy Header Not Set (only on WAF 403 block pages)
+10096	IGNORE	# Timestamp Disclosure (API returns ISO 8601 datetime fields by design)
+10112	IGNORE	# Session Management Response Identified (CSRF cookie, not session)
+90005	IGNORE	# Sec-Fetch-Dest Header Missing (ZAP's own requests lack this header)
+
+# ── WARN — low severity, review manually ─────────────────────────────────────
+10020	WARN	# X-Frame-Options Header (we set DENY, but warn if ZAP disagrees)
+
+# ── FAIL — medium/high severity, blocks the build ────────────────────────────
+
+# Information disclosure
+10016	FAIL	# Web Browser XSS Protection Not Enabled
+10017	FAIL	# Cross-Domain JavaScript Source File Inclusion
+10019	FAIL	# Content-Type Header Missing
+10024	FAIL	# Information Disclosure - Sensitive Information in URL
+10025	FAIL	# Information Disclosure - Sensitive Information in HTTP Referrer Header
+10027	FAIL	# Information Disclosure - Suspicious Comments
+10032	FAIL	# Viewstate
+10035	FAIL	# Strict-Transport-Security Header Not Set
+10040	FAIL	# Secure Pages Include Mixed Content
+10054	FAIL	# Cookie Without SameSite Attribute
+10056	FAIL	# X-Debug-Token Information Leak
+10057	FAIL	# Username Hash Found
+10061	FAIL	# X-AspNet-Version Response Header
+10062	FAIL	# PII Disclosure
+10098	FAIL	# Cross-Domain Misconfiguration
+10105	FAIL	# Weak Authentication Method
+10202	FAIL	# Absence of Anti-CSRF Tokens
+
+# Injection attacks
+40003	FAIL	# CRLF Injection
+40008	FAIL	# Parameter Tampering
+40009	FAIL	# Server Side Include
+40012	FAIL	# Cross Site Scripting (Reflected)
+40014	FAIL	# Cross Site Scripting (Persistent)
+40016	FAIL	# Cross Site Scripting (Persistent) - Prime
+40017	FAIL	# Cross Site Scripting (Persistent) - Spider
+40018	FAIL	# SQL Injection
+40019	FAIL	# SQL Injection - MySQL
+40020	FAIL	# SQL Injection - Hypersonic SQL
+40021	FAIL	# SQL Injection - Oracle
+40022	FAIL	# SQL Injection - PostgreSQL
+40024	FAIL	# SQL Injection - SQLite
+40026	FAIL	# Cross Site Scripting (DOM Based)
+40027	FAIL	# SQL Injection - MsSQL
+40028	FAIL	# ELMAH Information Leak
+40029	FAIL	# Trace.axd Information Leak
+40032	FAIL	# .htaccess Information Leak
+40034	FAIL	# .env Information Leak
+40035	FAIL	# Hidden File Finder
+40038	FAIL	# Bypassing 403
+40039	FAIL	# Web Cache Deception
+40040	FAIL	# CORS Misconfiguration
+40042	FAIL	# Spring Actuator Information Leak
+40043	FAIL	# Log4Shell
+40044	FAIL	# Exponential Entity Expansion (Billion Laughs)
+40045	FAIL	# Server Side Request Forgery (SSRF)
+40046	FAIL	# HTTP Only Site
+40048	FAIL	# Shell Injection
+40063	FAIL	# CORS Header Misconfiguration (Origin Reflection)
+
+# Infrastructure / framework leaks
+90001	FAIL	# Insecure JSF ViewState
+90011	FAIL	# Charset Mismatch
+90019	FAIL	# Server Side Code Injection
+90020	FAIL	# Remote OS Command Injection
+90021	FAIL	# XPath Injection
+90023	FAIL	# XML External Entity Attack
+90024	FAIL	# Generic Padding Oracle
+90025	FAIL	# Expression Language Injection
+90026	FAIL	# SOAP Action Spoofing
+90028	FAIL	# Insecure HTTP Method
+90029	FAIL	# SOAP XML Injection
+90030	FAIL	# WSDL File Detection
+90033	FAIL	# Loosely Scoped Cookie
+90034	FAIL	# Cloud Metadata Potentially Exposed (SSRF → AWS metadata endpoint)
