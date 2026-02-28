@@ -13,7 +13,7 @@ defaults:
 
 jobs:
   deploy:
-    name: Build & Deploy to Amplify
+    name: Build & Deploy to S3 + CloudFront
     runs-on: ubuntu-latest
     environment: prod
     permissions:
@@ -43,31 +43,24 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Upload dist to S3 and start Amplify deployment
-        env:
-          AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
+      - name: Sync dist/ to S3
         run: |
-          # Create a deployment in Amplify and get the upload URL
-          DEPLOYMENT=$(aws amplify create-deployment \
-            --app-id "$AMPLIFY_APP_ID" \
-            --branch-name main \
-            --output json)
+          # Sync hashed assets with long-lived cache (1 year immutable)
+          aws s3 sync dist/assets/ s3://${{ secrets.FRONTEND_BUCKET_NAME }}/assets/ \
+            --cache-control "public, max-age=31536000, immutable" \
+            --delete
 
-          JOB_ID=$(echo "$DEPLOYMENT" | jq -r '.jobId')
-          ZIP_UPLOAD_URL=$(echo "$DEPLOYMENT" | jq -r '.zipUploadUrl')
+          # Sync everything else with no-cache (HTML, manifest, etc.)
+          aws s3 sync dist/ s3://${{ secrets.FRONTEND_BUCKET_NAME }}/ \
+            --exclude "assets/*" \
+            --cache-control "no-store, no-cache, must-revalidate" \
+            --delete
 
-          # Zip the dist directory and upload
-          cd dist && zip -r ../dist.zip . && cd ..
-          curl -X PUT -H "Content-Type: application/zip" \
-            --data-binary @dist.zip "$ZIP_UPLOAD_URL"
-
-          # Start the deployment
-          aws amplify start-deployment \
-            --app-id "$AMPLIFY_APP_ID" \
-            --branch-name main \
-            --job-id "$JOB_ID"
-
-          echo "job_id=$JOB_ID" >> "$GITHUB_OUTPUT"
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
 
       - name: Notify Slack — success
         if: success()
@@ -75,7 +68,7 @@ jobs:
         with:
           channel-id: "C0AE6QV0URH"
           slack-message: |
-            :white_check_mark: *Frontend deployed* to Amplify (`main`)
+            :white_check_mark: *Frontend deployed* to `cbba.cloud.org.bo`
             Commit: `${{ github.sha }}`
             ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
         env:

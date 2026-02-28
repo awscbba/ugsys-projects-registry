@@ -166,7 +166,7 @@ Establish frontend quality infrastructure for `ugsys-projects-registry/web/` (Re
   - Note: this modifies `.github/workflows/` — explain the change per ai-guidelines.md before committing
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
 
-- [ ] 15. Final checkpoint — ensure all tests pass
+- [x] 15. Final checkpoint — ensure all tests pass
   - Run `npm run test:coverage` and `npm run build` inside `web/`; confirm everything is green; ask the user if questions arise.
 
 ## Notes
