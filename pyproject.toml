@@ -101,6 +101,10 @@ ignore_missing_imports = true
 module = ["aws_xray_sdk.*"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = ["ugsys_auth_client.*", "ugsys_logging_lib.*", "ugsys_event_lib.*"]
+ignore_missing_imports = true
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

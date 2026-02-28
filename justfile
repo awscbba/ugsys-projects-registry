@@ -73,3 +73,23 @@ web-typecheck:
 # Build frontend
 web-build:
     cd web && npm run build
+
+# Format frontend (write)
+web-format:
+    cd web && npm run format
+
+# Format check frontend (CI)
+web-format-check:
+    cd web && npm run format:check
+
+# Run frontend tests (single run, no watch)
+web-test:
+    cd web && npm run test:run
+
+# Run frontend tests with coverage
+web-coverage:
+    cd web && npm run test:coverage
+
+# Run npm audit at high severity
+web-audit:
+    cd web && npm audit --audit-level=high

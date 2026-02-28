@@ -59,14 +59,14 @@ class TestOpenToHalfOpen:
         cb = InMemoryCircuitBreaker(
             service_name="test-svc", failure_threshold=2, cooldown_seconds=10
         )
-        cb.record_failure()
-        cb.record_failure()
-        assert cb.state() == CircuitState.OPEN
-
-        # Simulate cooldown expiry by patching time.monotonic
         with patch("src.infrastructure.adapters.in_memory_circuit_breaker.time") as mock_time:
-            # Set monotonic to return a time well past the cooldown
-            mock_time.monotonic.return_value = cb._last_failure_time + 10
+            mock_time.monotonic.return_value = 1000.0
+            cb.record_failure()
+            cb.record_failure()
+            assert cb.state() == CircuitState.OPEN
+
+            # Simulate cooldown expiry
+            mock_time.monotonic.return_value = 1010.0
             assert cb.state() == CircuitState.HALF_OPEN
             assert cb.allow_request() is True
 
@@ -74,12 +74,13 @@ class TestOpenToHalfOpen:
         cb = InMemoryCircuitBreaker(
             service_name="test-svc", failure_threshold=2, cooldown_seconds=30
         )
-        cb.record_failure()
-        cb.record_failure()
-        assert cb.state() == CircuitState.OPEN
-
         with patch("src.infrastructure.adapters.in_memory_circuit_breaker.time") as mock_time:
-            mock_time.monotonic.return_value = cb._last_failure_time + 29
+            mock_time.monotonic.return_value = 1000.0
+            cb.record_failure()
+            cb.record_failure()
+            assert cb.state() == CircuitState.OPEN
+
+            mock_time.monotonic.return_value = 1029.0
             assert cb.state() == CircuitState.OPEN
             assert cb.allow_request() is False
 
@@ -91,11 +92,11 @@ class TestHalfOpenToClosed:
         cb = InMemoryCircuitBreaker(
             service_name="test-svc", failure_threshold=2, cooldown_seconds=10
         )
-        cb.record_failure()
-        cb.record_failure()
-
         with patch("src.infrastructure.adapters.in_memory_circuit_breaker.time") as mock_time:
-            mock_time.monotonic.return_value = cb._last_failure_time + 10
+            mock_time.monotonic.return_value = 1000.0
+            cb.record_failure()
+            cb.record_failure()
+            mock_time.monotonic.return_value = 1010.0
             assert cb.state() == CircuitState.HALF_OPEN
 
         cb.record_success()
@@ -110,17 +111,18 @@ class TestHalfOpenToOpen:
         cb = InMemoryCircuitBreaker(
             service_name="test-svc", failure_threshold=2, cooldown_seconds=10
         )
-        cb.record_failure()
-        cb.record_failure()
-
         with patch("src.infrastructure.adapters.in_memory_circuit_breaker.time") as mock_time:
-            mock_time.monotonic.return_value = cb._last_failure_time + 10
+            mock_time.monotonic.return_value = 1000.0
+            cb.record_failure()
+            cb.record_failure()
+            mock_time.monotonic.return_value = 1010.0
             assert cb.state() == CircuitState.HALF_OPEN
 
-        # Failure in HALF_OPEN should reopen
-        cb.record_failure()
-        assert cb.state() == CircuitState.OPEN
-        assert cb.allow_request() is False
+            # Failure in HALF_OPEN should reopen — keep patch active so record_failure
+            # sets _last_failure_time to the mocked value
+            cb.record_failure()
+            assert cb.state() == CircuitState.OPEN
+            assert cb.allow_request() is False
 
 
 class TestSuccessResetsFailureCount:
@@ -143,11 +145,11 @@ class TestSuccessResetsFailureCount:
         cb = InMemoryCircuitBreaker(
             service_name="test-svc", failure_threshold=2, cooldown_seconds=10
         )
-        cb.record_failure()
-        cb.record_failure()
-
         with patch("src.infrastructure.adapters.in_memory_circuit_breaker.time") as mock_time:
-            mock_time.monotonic.return_value = cb._last_failure_time + 10
+            mock_time.monotonic.return_value = 1000.0
+            cb.record_failure()
+            cb.record_failure()
+            mock_time.monotonic.return_value = 1010.0
             assert cb.state() == CircuitState.HALF_OPEN
 
         cb.record_success()

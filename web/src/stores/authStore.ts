@@ -2,6 +2,33 @@ import { atom, computed } from "nanostores";
 import type { AuthUser, TokenPair } from "../types/auth";
 import { authService } from "../services/authService";
 
+// ── In-memory token storage — never written to localStorage ──────────────────
+
+let _accessToken: string | null = null;
+let _refreshToken: string | null = null;
+
+/** Called by httpClient — reads from memory, not localStorage */
+export function getAccessToken(): string | null {
+  return _accessToken;
+}
+
+/** Called by httpClient — reads from memory, not localStorage */
+export function getRefreshToken(): string | null {
+  return _refreshToken;
+}
+
+/** Called by httpClient after a successful token refresh */
+export function setTokens(accessToken: string, refreshToken: string): void {
+  _accessToken = accessToken;
+  _refreshToken = refreshToken;
+}
+
+/** Called by httpClient on refresh failure or explicit logout */
+export function clearTokens(): void {
+  _accessToken = null;
+  _refreshToken = null;
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function decodeJwtPayload(token: string): Record<string, unknown> {
@@ -41,26 +68,23 @@ export const $isAuthenticated = computed($user, (user) => user !== null);
 // ── Actions ───────────────────────────────────────────────────────────────────
 
 /**
- * Call once on app startup. Reads access_token from localStorage,
- * validates expiry, and hydrates $user from JWT claims.
+ * Call once on app startup. Tokens are in-memory only — no localStorage hydration.
+ * If the user refreshes the page, they will need to log in again.
  */
 export function initializeAuth(): void {
-  const token = localStorage.getItem("access_token");
-  if (!token) return;
-  const user = extractUser(token);
-  $user.set(user);
+  // No-op: tokens are not persisted. Session is lost on page reload by design.
 }
 
 /**
- * Authenticate with email + password. Stores tokens in localStorage
- * and sets $user from the returned access_token claims.
+ * Authenticate with email + password. Stores tokens in memory only (not localStorage).
+ * Sets $user from the returned access_token claims.
  */
 export async function login(email: string, password: string): Promise<void> {
   $isLoading.set(true);
   try {
     const tokens: TokenPair = await authService.login(email, password);
-    localStorage.setItem("access_token", tokens.access_token);
-    localStorage.setItem("refresh_token", tokens.refresh_token);
+    _accessToken = tokens.access_token;
+    _refreshToken = tokens.refresh_token;
     const user = extractUser(tokens.access_token);
     $user.set(user);
   } finally {
@@ -69,11 +93,18 @@ export async function login(email: string, password: string): Promise<void> {
 }
 
 /**
- * Clear session and redirect to home.
+ * Clear in-memory session and redirect to home.
  */
-export function logout(): void {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
+export async function logout(): Promise<void> {
+  _accessToken = null;
+  _refreshToken = null;
   $user.set(null);
+  try {
+    // Import lazily to avoid circular dependency (httpClient imports authStore)
+    const { httpClient } = await import("../services/httpClient");
+    await httpClient.post("/api/v1/auth/logout");
+  } catch {
+    // best-effort — session already cleared client-side
+  }
   window.location.href = "/";
 }

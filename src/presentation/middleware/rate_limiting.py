@@ -69,6 +69,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             logger.warning("rate_limit.exceeded", key=key)
             return JSONResponse(
                 status_code=429,
+                # nosemgrep: python.flask.security.audit.directly-returned-format-string
                 content={"error": "RATE_LIMIT_EXCEEDED", "message": "Too many requests"},
                 headers={
                     "Retry-After": str(reset_in),

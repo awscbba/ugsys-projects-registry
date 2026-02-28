@@ -8,7 +8,12 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:run": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/"
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -27,6 +32,18 @@
     "@tailwindcss/vite": "^4.0.0",
     "eslint": "^9.0.0",
     "typescript-eslint": "^8.0.0",
-    "@eslint/js": "^9.0.0"
+    "@eslint/js": "^9.0.0",
+    "vitest": "^2.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "jsdom": "^25.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "fast-check": "^3.0.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-jsx-a11y": "^6.0.0",
+    "eslint-plugin-react": "^7.0.0",
+    "prettier": "^3.0.0",
+    "eslint-config-prettier": "^9.0.0"
   }
 }

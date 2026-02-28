@@ -98,13 +98,13 @@ async def update_subscription(
         )
         result = await service.approve(cmd)
     elif body.action == "reject":
-        cmd = RejectSubscriptionCommand(
+        reject_cmd = RejectSubscriptionCommand(
             subscription_id=subscription_id,
             project_id=project_id,
             admin_id=user.sub,
             reason=body.reason,
         )
-        result = await service.reject(cmd)
+        result = await service.reject(reject_cmd)
     else:
         raise ValidationError(
             message=f"Invalid subscription action: {body.action!r}",

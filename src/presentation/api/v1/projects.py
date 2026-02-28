@@ -75,7 +75,13 @@ async def create_project(
 ) -> dict[str, Any]:
     image = None
     if body.image_url and body.cloudfront_url:
-        image = ProjectImage(url=body.image_url, cloudfront_url=body.cloudfront_url)
+        image = ProjectImage(
+            image_id="",
+            filename=body.image_url,
+            content_type="",
+            cloudfront_url=body.cloudfront_url,
+            uploaded_at="",
+        )
     cmd = CreateProjectCommand(
         name=body.name,
         description=body.description,
@@ -165,7 +171,13 @@ async def update_project(
 ) -> dict[str, Any]:
     image = None
     if body.image_url and body.cloudfront_url:
-        image = ProjectImage(url=body.image_url, cloudfront_url=body.cloudfront_url)
+        image = ProjectImage(
+            image_id="",
+            filename=body.image_url,
+            content_type="",
+            cloudfront_url=body.cloudfront_url,
+            uploaded_at="",
+        )
     cmd = UpdateProjectCommand(
         project_id=project_id,
         requester_id=user.sub,

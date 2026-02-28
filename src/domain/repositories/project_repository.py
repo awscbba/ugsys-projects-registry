@@ -7,8 +7,12 @@ Infrastructure layer provides the concrete DynamoDB implementation.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 from src.domain.entities.project import Project
+
+if TYPE_CHECKING:
+    from src.application.queries.project_queries import ProjectListQuery
 
 
 class ProjectRepository(ABC):
@@ -39,6 +43,6 @@ class ProjectRepository(ABC):
     async def list_public(self, limit: int) -> list[Project]: ...
 
     @abstractmethod
-    async def list_by_query(self, query: "ProjectListQuery") -> tuple[list[Project], int]:  # noqa: F821, UP037
+    async def list_by_query(self, query: ProjectListQuery) -> tuple[list[Project], int]:
         """List projects matching the query criteria with total count."""
         ...

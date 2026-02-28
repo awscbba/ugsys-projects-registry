@@ -6,6 +6,8 @@ BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
 if [[ "$BRANCH" == "main" ]]; then
   echo -e "${RED}✗ Direct commits to 'main' are not allowed.${NC}"; exit 1
 fi
+
+# ── Python backend checks ─────────────────────────────────────────────────────
 echo -e "${YELLOW}── Ruff lint ──${NC}"
 if just --quiet lint 2>&1; then
   echo -e "  ${GREEN}✓ ruff lint${NC}"
@@ -24,6 +26,49 @@ if just test 2>&1; then
 else
   echo -e "  ${RED}✗ unit tests failed — run: just test${NC}"; exit 1
 fi
+
+# ── Frontend checks (only when web/ files are staged) ────────────────────────
+STAGED_WEB=$(git diff --cached --name-only | grep '^web/' || true)
+if [[ -n "$STAGED_WEB" ]]; then
+  echo ""
+  echo -e "${YELLOW}── Frontend checks (staged web/ files detected) ──${NC}"
+
+  echo -e "${YELLOW}  ── npm lint ──${NC}"
+  if just web-lint 2>&1; then
+    echo -e "  ${GREEN}✓ eslint${NC}"
+  else
+    echo -e "  ${RED}✗ eslint failed — run: just web-lint${NC}"; exit 1
+  fi
+
+  echo -e "${YELLOW}  ── prettier format check ──${NC}"
+  if just web-format-check 2>&1; then
+    echo -e "  ${GREEN}✓ prettier${NC}"
+  else
+    echo -e "  ${RED}✗ prettier failed — run: just web-format${NC}"; exit 1
+  fi
+
+  echo -e "${YELLOW}  ── TypeScript typecheck ──${NC}"
+  if just web-typecheck 2>&1; then
+    echo -e "  ${GREEN}✓ typecheck${NC}"
+  else
+    echo -e "  ${RED}✗ typecheck failed — run: just web-typecheck${NC}"; exit 1
+  fi
+
+  echo -e "${YELLOW}  ── Frontend tests ──${NC}"
+  if just web-test 2>&1; then
+    echo -e "  ${GREEN}✓ frontend tests${NC}"
+  else
+    echo -e "  ${RED}✗ frontend tests failed — run: just web-test${NC}"; exit 1
+  fi
+
+  echo -e "${YELLOW}  ── npm audit ──${NC}"
+  if just web-audit 2>&1; then
+    echo -e "  ${GREEN}✓ npm audit${NC}"
+  else
+    echo -e "  ${RED}✗ npm audit found high/critical vulnerabilities — run: just web-audit${NC}"; exit 1
+  fi
+fi
+
 echo ""
 echo -e "${GREEN}✓ All pre-commit checks passed.${NC}" && echo ""
 exit 0

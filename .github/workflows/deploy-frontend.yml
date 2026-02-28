@@ -2,23 +2,23 @@ name: Deploy Frontend
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - "web/**"
-      - ".github/workflows/deploy-frontend.yml"
 
-permissions:
-  contents: read
-  id-token: write
+defaults:
+  run:
+    working-directory: web
 
 jobs:
   deploy:
-    name: Deploy Frontend to S3 + CloudFront
+    name: Build & Deploy to Amplify
     runs-on: ubuntu-latest
     environment: prod
-    defaults:
-      run:
-        working-directory: web
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -26,8 +26,16 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          # Requires web/package-lock.json to be committed
           cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_AUTH_API_URL: ${{ secrets.VITE_AUTH_API_URL }}
+        run: npm run build
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -35,44 +43,51 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
-      - run: npm ci
-
-      - name: Build
-        run: npm run build
+      - name: Upload dist to S3 and start Amplify deployment
         env:
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-          VITE_AUTH_API_URL: ${{ secrets.VITE_AUTH_API_URL }}
-
-      - name: Upload to S3
+          AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
         run: |
-          aws s3 sync dist/ s3://ugsys-frontend-prod/ \
-            --delete \
-            --cache-control "no-cache, no-store, must-revalidate" \
-            --exclude "assets/*"
-          aws s3 sync dist/assets/ s3://ugsys-frontend-prod/assets/ \
-            --delete \
-            --cache-control "public, max-age=31536000, immutable"
+          # Create a deployment in Amplify and get the upload URL
+          DEPLOYMENT=$(aws amplify create-deployment \
+            --app-id "$AMPLIFY_APP_ID" \
+            --branch-name main \
+            --output json)
 
-      - name: Invalidate CloudFront cache
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
+          JOB_ID=$(echo "$DEPLOYMENT" | jq -r '.jobId')
+          ZIP_UPLOAD_URL=$(echo "$DEPLOYMENT" | jq -r '.zipUploadUrl')
 
-      - name: Notify Slack — Success
+          # Zip the dist directory and upload
+          cd dist && zip -r ../dist.zip . && cd ..
+          curl -X PUT -H "Content-Type: application/zip" \
+            --data-binary @dist.zip "$ZIP_UPLOAD_URL"
+
+          # Start the deployment
+          aws amplify start-deployment \
+            --app-id "$AMPLIFY_APP_ID" \
+            --branch-name main \
+            --job-id "$JOB_ID"
+
+          echo "job_id=$JOB_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Slack — success
         if: success()
         uses: slackapi/slack-github-action@v1
         with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          slack-message: "✅ Frontend deployed `ugsys-projects-registry` to prod — ${{ github.sha }}"
+          channel-id: "C0AE6QV0URH"
+          slack-message: |
+            :white_check_mark: *Frontend deployed* to Amplify (`main`)
+            Commit: `${{ github.sha }}`
+            ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: Notify Slack — Failure
+      - name: Notify Slack — failure
         if: failure()
         uses: slackapi/slack-github-action@v1
         with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          slack-message: "❌ Frontend deploy failed for `ugsys-projects-registry` — ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          channel-id: "C0AE6QV0URH"
+          slack-message: |
+            :x: *Frontend deploy failed* on `${{ github.repository }}`
+            Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

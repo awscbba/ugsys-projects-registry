@@ -1,34 +1,42 @@
 import { useState, useEffect } from 'react';
 import type { IProjectApi } from '../services/ports';
+import type { FormSchema } from '../types/form';
 import type { Project } from '../types/project';
 import { projectApi } from '../services/projectApi';
 
-export function useProjects(
-  page: number,
-  pageSize = 12,
+export type EnhancedProject = Project & { form_schema?: FormSchema };
+
+export interface UseProjectDetailResult {
+  project: EnhancedProject | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+export function useProjectDetail(
+  projectId: string | undefined,
   api: IProjectApi = projectApi
-): { projects: Project[]; total: number; isLoading: boolean; error: string | null } {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [total, setTotal] = useState(0);
+): UseProjectDetailResult {
+  const [project, setProject] = useState<EnhancedProject | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!projectId) return;
+
     let cancelled = false;
     setIsLoading(true);
     setError(null);
 
     api
-      .getPublicProjects(page, pageSize)
-      .then((res) => {
+      .getProjectEnhanced(projectId)
+      .then((data) => {
         if (!cancelled) {
-          setProjects(res.data);
-          setTotal(res.meta.total);
+          setProject(data as EnhancedProject);
         }
       })
       .catch((e: unknown) => {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : 'Error al cargar proyectos');
+          setError(e instanceof Error ? e.message : 'Error al cargar el proyecto');
         }
       })
       .finally(() => {
@@ -38,7 +46,7 @@ export function useProjects(
     return () => {
       cancelled = true;
     };
-  }, [page, pageSize, api]);
+  }, [projectId, api]);
 
-  return { projects, total, isLoading, error };
+  return { project, isLoading, error };
 }

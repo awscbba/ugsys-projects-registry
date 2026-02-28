@@ -1,12 +1,19 @@
 /**
  * Singleton HTTP client wrapping fetch.
- * - Injects Authorization: Bearer <token> from localStorage
+ * - Injects Authorization: Bearer <token> from in-memory authStore (not localStorage)
  * - Adds X-Request-ID (UUID v4) on every request
  * - 401 interceptor: refresh once → retry → force logout on failure
  * - Unwraps { data, meta } envelope on success
  * - Throws Error with user-facing message on failure
  * - 15-second timeout via AbortController
  */
+
+import {
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+  clearTokens,
+} from "../stores/authStore";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 const TIMEOUT_MS = 15_000;
@@ -18,19 +25,6 @@ let _refreshTokenFn: RefreshFn | null = null;
 /** Injected by authService to avoid circular dependency. */
 export function setRefreshTokenFn(fn: RefreshFn): void {
   _refreshTokenFn = fn;
-}
-
-function getAccessToken(): string | null {
-  return localStorage.getItem("access_token");
-}
-
-function getRefreshToken(): string | null {
-  return localStorage.getItem("refresh_token");
-}
-
-function clearTokens(): void {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
 }
 
 function forceLogout(): void {
@@ -67,10 +61,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
   return json as T;
 }
 
-async function fetchWithTimeout(
-  url: string,
-  options: RequestInit,
-): Promise<Response> {
+async function fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
@@ -84,7 +75,7 @@ async function request<T>(
   method: string,
   path: string,
   body?: unknown,
-  isRetry = false,
+  isRetry = false
 ): Promise<T> {
   const token = getAccessToken();
   const url = `${BASE_URL}${path}`;
@@ -106,8 +97,7 @@ async function request<T>(
     if (refreshToken && _refreshTokenFn) {
       try {
         const tokens = await _refreshTokenFn(refreshToken);
-        localStorage.setItem("access_token", tokens.access_token);
-        localStorage.setItem("refresh_token", tokens.refresh_token);
+        setTokens(tokens.access_token, tokens.refresh_token);
         // Retry original request once
         return request<T>(method, path, body, true);
       } catch {

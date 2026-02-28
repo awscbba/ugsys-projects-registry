@@ -13,7 +13,7 @@ from starlette.responses import Response
 logger = structlog.get_logger()
 
 try:
-    from aws_xray_sdk.core import xray_recorder  # type: ignore[import-untyped]
+    from aws_xray_sdk.core import xray_recorder
 
     _xray_available = True
 except ImportError:

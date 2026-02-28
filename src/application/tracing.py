@@ -20,7 +20,7 @@ logger = structlog.get_logger()
 
 _xray_available = False
 try:
-    from aws_xray_sdk.core import xray_recorder  # type: ignore[import-untyped]
+    from aws_xray_sdk.core import xray_recorder
 
     _xray_available = True
 except ImportError:
@@ -31,7 +31,7 @@ except ImportError:
 _F = TypeVar("_F", bound=Callable[..., Coroutine[Any, Any, Any]])
 
 
-@contextmanager  # type: ignore[misc]
+@contextmanager
 def traced_subsegment(name: str) -> Any:
     """Context manager that creates an X-Ray subsegment, or is a no-op if unavailable."""
     if not _xray_available or xray_recorder is None:

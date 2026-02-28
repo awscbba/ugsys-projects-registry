@@ -95,7 +95,7 @@ jobs:
       - name: Generate SBOM
         run: |
           pip install cyclonedx-bom
-          cyclonedx-py environment -o sbom.json --format json
+          cyclonedx-py environment -o sbom.json
       - name: Scan SBOM with Trivy
         uses: aquasecurity/trivy-action@master
         with:

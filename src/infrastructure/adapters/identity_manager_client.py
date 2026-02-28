@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable, Coroutine
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 import httpx
 import structlog
@@ -40,7 +40,7 @@ class IdentityManagerClient(IdentityClient):
     def _get_trace_header(self) -> dict[str, str]:
         """Get X-Ray trace header for outbound propagation."""
         try:
-            from aws_xray_sdk.core import xray_recorder  # type: ignore[import-untyped]
+            from aws_xray_sdk.core import xray_recorder
 
             segment = xray_recorder.current_segment()
             if segment is not None:
@@ -111,7 +111,7 @@ class IdentityManagerClient(IdentityClient):
                     timeout=5.0,
                 )
             if resp.status_code == 200:
-                return resp.json().get("exists", False)
+                return cast(bool, resp.json().get("exists", False))
             raise ExternalServiceError(
                 message=f"Identity Manager check-email returned {resp.status_code}",
                 user_message="An unexpected error occurred",
@@ -137,7 +137,7 @@ class IdentityManagerClient(IdentityClient):
                     timeout=5.0,
                 )
             if resp.status_code == 201:
-                return resp.json()["data"]["id"]
+                return cast(str, resp.json()["data"]["id"])
             raise ExternalServiceError(
                 message=f"Identity Manager create-user returned {resp.status_code}",
                 user_message="An unexpected error occurred",
@@ -197,7 +197,7 @@ class IdentityManagerClient(IdentityClient):
                     timeout=5.0,
                 )
             if resp.status_code == 200:
-                return resp.json().get("config", {})
+                return cast(dict[str, Any], resp.json().get("config", {}))
             raise ExternalServiceError(
                 message=f"Identity Manager get-service-config returned {resp.status_code}",
                 user_message="An unexpected error occurred",
@@ -220,8 +220,8 @@ class IdentityManagerClient(IdentityClient):
                 )
             if resp.status_code == 200:
                 body = resp.json()
-                users: list[dict[str, Any]] = body.get("data", [])
-                total: int = body.get("meta", {}).get("total", len(users))
+                users: list[dict[str, Any]] = cast(list[dict[str, Any]], body.get("data", []))
+                total: int = cast(int, body.get("meta", {}).get("total", len(users)))
                 return users, total
             raise ExternalServiceError(
                 message=f"Identity Manager list-users returned {resp.status_code}",

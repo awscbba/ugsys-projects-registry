@@ -27,7 +27,7 @@ logger = structlog.get_logger()
 # X-Ray patching — must happen before boto3 clients are created
 if settings.xray_tracing_enabled:
     try:
-        from aws_xray_sdk.core import patch_all, xray_recorder  # type: ignore[import-untyped]
+        from aws_xray_sdk.core import patch_all, xray_recorder
 
         xray_recorder.configure(
             sampling=True,

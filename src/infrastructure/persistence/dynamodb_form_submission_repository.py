@@ -13,7 +13,7 @@ Table: ugsys-form-submissions-{env}
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Never
 
 import structlog
 from botocore.exceptions import ClientError
@@ -133,7 +133,7 @@ class DynamoDBFormSubmissionRepository(FormSubmissionRepository):
 
     # ── Error handling ────────────────────────────────────────────────────────
 
-    def _raise_repository_error(self, operation: str, e: ClientError) -> None:
+    def _raise_repository_error(self, operation: str, e: ClientError) -> Never:
         """Log full ClientError internally, raise safe RepositoryError to callers."""
         logger.error(
             "dynamodb.error",
