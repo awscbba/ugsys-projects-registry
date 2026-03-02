@@ -41,7 +41,7 @@ def _get_client_key(request: Request) -> str:
     forwarded = request.headers.get("X-Forwarded-For")
     if forwarded:
         client_ip = forwarded.split(",")[0].strip()
-        return f"ip:{client_ip}"  # nosemgrep: python.flask.security.audit.directly-returned-format-string.directly-returned-format-string
+        return f"ip:{client_ip}"  # nosemgrep: directly-returned-format-string
     client = request.client
     if client:
         return f"ip:{client.host}"
