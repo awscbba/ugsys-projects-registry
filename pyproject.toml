@@ -51,6 +51,7 @@ ignore = ["S101"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106", "ANN", "E501"]
+"scripts/**" = ["ANN401"]  # boto3 client has no stub type — Any is correct here
 "src/presentation/api/v1/*.py" = ["B008"]  # FastAPI Depends() in function defaults is intentional
 "src/main.py" = ["E402"]  # configure_logging() must run before other imports
 "src/infrastructure/adapters/s3_client.py" = ["ANN401"]  # aioboto3 client has no stub type
