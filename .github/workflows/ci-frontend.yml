@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - "feature/**"
+      - "fix/**"
+      - "ci/**"
+      - "refactor/**"
     paths:
       - "web/**"
   pull_request:
