@@ -50,6 +50,24 @@ jobs:
             --image-uri ${{ steps.build.outputs.image_uri }} \
             --region ${{ env.AWS_REGION }}
 
+      - name: Update Lambda environment variables
+        run: |
+          aws lambda update-function-configuration \
+            --function-name ugsys-projects-registry-prod \
+            --region ${{ env.AWS_REGION }} \
+            --environment "Variables={
+              PROJECTS_TABLE_NAME=ugsys-projects-prod,
+              SUBSCRIPTIONS_TABLE_NAME=ugsys-subscriptions-prod,
+              FORM_SUBMISSIONS_TABLE_NAME=ugsys-form-submissions-prod,
+              DYNAMODB_TABLE_PREFIX=ugsys,
+              EVENT_BUS_NAME=ugsys-platform-bus,
+              ENVIRONMENT=prod,
+              APP_ENV=prod,
+              S3_IMAGES_BUCKET=ugsys-images-prod,
+              LOG_LEVEL=INFO,
+              ALLOWED_ORIGINS=https://registry.apps.cloud.org.bo,https://admin.apps.cloud.org.bo,https://auth.apps.cloud.org.bo,https://messaging.apps.cloud.org.bo
+            }"
+
       - name: Notify success
         if: success()
         uses: slackapi/slack-github-action@v1
