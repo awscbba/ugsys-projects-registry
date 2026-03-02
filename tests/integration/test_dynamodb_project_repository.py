@@ -38,25 +38,24 @@ def _create_projects_table(client: Any) -> None:
         AttributeDefinitions=[
             {"AttributeName": "PK", "AttributeType": "S"},
             {"AttributeName": "SK", "AttributeType": "S"},
-            {"AttributeName": "GSI1PK", "AttributeType": "S"},
-            {"AttributeName": "GSI1SK", "AttributeType": "S"},
-            {"AttributeName": "GSI2PK", "AttributeType": "S"},
-            {"AttributeName": "GSI2SK", "AttributeType": "S"},
+            {"AttributeName": "status", "AttributeType": "S"},
+            {"AttributeName": "created_at", "AttributeType": "S"},
+            {"AttributeName": "created_by", "AttributeType": "S"},
         ],
         GlobalSecondaryIndexes=[
             {
                 "IndexName": "status-index",
                 "KeySchema": [
-                    {"AttributeName": "GSI1PK", "KeyType": "HASH"},
-                    {"AttributeName": "GSI1SK", "KeyType": "RANGE"},
+                    {"AttributeName": "status", "KeyType": "HASH"},
+                    {"AttributeName": "created_at", "KeyType": "RANGE"},
                 ],
                 "Projection": {"ProjectionType": "ALL"},
             },
             {
                 "IndexName": "created_by-index",
                 "KeySchema": [
-                    {"AttributeName": "GSI2PK", "KeyType": "HASH"},
-                    {"AttributeName": "GSI2SK", "KeyType": "RANGE"},
+                    {"AttributeName": "created_by", "KeyType": "HASH"},
+                    {"AttributeName": "created_at", "KeyType": "RANGE"},
                 ],
                 "Projection": {"ProjectionType": "ALL"},
             },
@@ -282,8 +281,6 @@ async def test_backward_compatibility_missing_optional_fields(dynamodb_setup):
             "created_by": {"S": "01JOWNER00000000000000002"},
             "created_at": {"S": "2024-06-01T00:00:00Z"},
             "updated_at": {"S": "2024-06-01T00:00:00Z"},
-            "GSI1PK": {"S": "STATUS#active"},
-            "GSI1SK": {"S": "2024-06-01T00:00:00Z"},
         },
     )
 

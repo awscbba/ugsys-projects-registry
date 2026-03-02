@@ -141,8 +141,9 @@ class DynamoDBProjectRepository(ProjectRepository):
             response = await self._client.query(
                 TableName=self._table_name,
                 IndexName="status-index",
-                KeyConditionExpression="GSI1PK = :status",
-                ExpressionAttributeValues={":status": {"S": "STATUS#active"}},
+                KeyConditionExpression="#status = :status",
+                ExpressionAttributeNames={"#status": "status"},
+                ExpressionAttributeValues={":status": {"S": "active"}},
             )
             items = response.get("Items", [])
             projects = [
@@ -169,9 +170,10 @@ class DynamoDBProjectRepository(ProjectRepository):
                 response = await self._client.query(
                     TableName=self._table_name,
                     IndexName="status-index",
-                    KeyConditionExpression="GSI1PK = :status",
+                    KeyConditionExpression="#status = :status",
+                    ExpressionAttributeNames={"#status": "status"},
                     ExpressionAttributeValues={
-                        ":status": {"S": f"STATUS#{query.status}"},
+                        ":status": {"S": query.status},
                     },
                 )
             else:
