@@ -94,14 +94,18 @@ jobs:
       - run: uv sync --frozen --extra dev
       - name: Generate SBOM
         run: uv run cyclonedx-py environment -o sbom.json
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -qq && sudo apt-get install -y trivy
       - name: Scan SBOM with Trivy
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: sbom
-          scan-ref: sbom.json
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: 1
+        run: |
+          trivy sbom sbom.json \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --exit-code 1
 
   secret-scan:
     name: Secret Scan — Gitleaks
