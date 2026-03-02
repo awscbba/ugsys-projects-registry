@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # ---------------------------------------------------------------------------
@@ -101,6 +102,18 @@ class Settings(BaseSettings):
         "https://messaging.apps.cloud.org.bo",  # omnichannel frontend (future)
     ]
 
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, v: object) -> list[str]:
+        """Support comma-separated string from Lambda env vars, e.g.
+        ALLOWED_ORIGINS=https://a.example.com,https://b.example.com
+        """
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        if isinstance(v, list):
+            return [str(item) for item in v]
+        return []
+
     # ── Operator-configurable (overridable via remote config) ───────────────
     max_subscriptions_per_project: int = 100
     admin_notification_email: str = ""
@@ -114,7 +127,6 @@ class Settings(BaseSettings):
         env_file=".env",
         extra="ignore",
         case_sensitive=False,
-        env_list_separator=",",  # allows ALLOWED_ORIGINS as comma-separated string in prod
     )
 
     def apply_remote_config(self, config: dict[str, Any]) -> None:
