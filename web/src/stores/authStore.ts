@@ -1,6 +1,5 @@
 import { atom, computed } from 'nanostores';
 import type { AuthUser, TokenPair } from '../types/auth';
-import { authService } from '../services/authService';
 
 // ── In-memory token storage — never written to localStorage ──────────────────
 
@@ -82,6 +81,8 @@ export function initializeAuth(): void {
 export async function login(email: string, password: string): Promise<void> {
   $isLoading.set(true);
   try {
+    // Import lazily to avoid circular dependency (authService → httpClient → authStore)
+    const { authService } = await import('../services/authService');
     const tokens: TokenPair = await authService.login(email, password);
     _accessToken = tokens.access_token;
     _refreshToken = tokens.refresh_token;
