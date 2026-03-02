@@ -114,6 +114,7 @@ class Settings(BaseSettings):
         env_file=".env",
         extra="ignore",
         case_sensitive=False,
+        env_list_separator=",",  # allows ALLOWED_ORIGINS as comma-separated string in prod
     )
 
     def apply_remote_config(self, config: dict[str, Any]) -> None:
