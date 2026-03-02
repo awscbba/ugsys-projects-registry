@@ -10,7 +10,7 @@ on:
       target_url:
         description: "Target URL to scan"
         required: false
-        default: "https://api.cbba.cloud.org.bo/projects"
+        default: "https://api.apps.cloud.org.bo/api/v1/projects"
 
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
-          target: ${{ github.event.inputs.target_url || 'https://api.cbba.cloud.org.bo/projects' }}
+          target: ${{ github.event.inputs.target_url || 'https://api.apps.cloud.org.bo/api/v1/projects' }}
           rules_file_name: ".zap/rules.tsv"
           fail_action: true
           allow_issue_writing: false
@@ -46,7 +46,7 @@ jobs:
       - name: Run Nuclei
         uses: projectdiscovery/nuclei-action@main
         with:
-          target: ${{ github.event.inputs.target_url || 'https://api.cbba.cloud.org.bo/projects' }}
+          target: ${{ github.event.inputs.target_url || 'https://api.apps.cloud.org.bo/api/v1/projects' }}
           flags: "-severity critical -stats"
           github-report: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
