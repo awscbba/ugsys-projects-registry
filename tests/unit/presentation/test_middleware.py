@@ -269,3 +269,120 @@ class TestRateLimitMiddleware:
 
         assert r_ip1_third.status_code == 429
         assert r_ip2.status_code == 200
+
+
+# ── Bug Condition Exploration Tests (CORS Preflight Fix) ──────────────────────
+
+
+class TestSecurityHeadersMiddlewareCORSFix:
+    """Bug condition exploration tests — Property 1: Fault Condition.
+
+    These tests encode the EXPECTED (fixed) behavior.
+    They FAIL on unfixed code (confirming the bug) and PASS on fixed code.
+
+    Validates: Requirements 1.1, 1.2, 1.3
+    """
+
+    @pytest.fixture
+    def app(self) -> FastAPI:
+        return _make_app(SecurityHeadersMiddleware)
+
+    async def test_options_preflight_does_not_inject_corp_header(self, app: FastAPI) -> None:
+        """Bug condition: OPTIONS from allowed origin must NOT get Cross-Origin-Resource-Policy.
+
+        FAILS on unfixed code: CORP is present → browser blocks preflight.
+        PASSES on fixed code: OPTIONS short-circuit, CORP absent.
+        """
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.options(
+                "/ping",
+                headers={
+                    "Origin": "https://registry.apps.cloud.org.bo",
+                    "Access-Control-Request-Method": "GET",
+                },
+            )
+        assert "cross-origin-resource-policy" not in response.headers
+
+    async def test_options_preflight_does_not_inject_any_security_headers(
+        self, app: FastAPI
+    ) -> None:
+        """OPTIONS short-circuit: no security headers stamped on preflight responses."""
+        from src.presentation.middleware.security_headers import _SECURITY_HEADERS
+
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.options(
+                "/api/v1/ping",
+                headers={
+                    "Origin": "https://registry.apps.cloud.org.bo",
+                    "Access-Control-Request-Method": "POST",
+                },
+            )
+        for header_key in _SECURITY_HEADERS:
+            assert header_key.lower() not in response.headers, (
+                f"Security header '{header_key}' must not be injected on OPTIONS preflight"
+            )
+
+
+# ── Preservation Property Tests (CORS Preflight Fix) ─────────────────────────
+
+
+class TestSecurityHeadersMiddlewarePreservation:
+    """Property 2: Preservation — non-OPTIONS requests retain all security headers.
+
+    These tests PASS on both unfixed and fixed code, confirming baseline behavior
+    is preserved by the fix.
+
+    Validates: Requirements 3.1, 3.4
+    """
+
+    @pytest.fixture
+    def app(self) -> FastAPI:
+        return _make_app(SecurityHeadersMiddleware)
+
+    @pytest.mark.parametrize("method", ["GET", "POST", "PUT", "PATCH", "DELETE"])
+    async def test_non_options_requests_always_get_security_headers(
+        self, method: str, app: FastAPI
+    ) -> None:
+        """Property 2a: for any non-OPTIONS method, all _REQUIRED_HEADERS must be present."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.request(method, "/ping")
+        for header in _REQUIRED_HEADERS:
+            assert header in response.headers, f"Missing '{header}' on {method} response"
+
+    @pytest.mark.parametrize("method", ["GET", "POST", "PUT", "PATCH", "DELETE"])
+    async def test_api_routes_always_get_cache_control(self, method: str, app: FastAPI) -> None:
+        """Property 2b: Cache-Control must be set on /api/* routes for non-OPTIONS."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.request(method, "/api/v1/ping")
+        assert "cache-control" in response.headers
+        assert "no-store" in response.headers["cache-control"]
+
+    @pytest.mark.parametrize("method", ["GET", "POST", "OPTIONS", "PUT", "DELETE"])
+    async def test_server_header_always_absent(self, method: str, app: FastAPI) -> None:
+        """Property 2c: Server header must never appear in any response."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.request(method, "/ping")
+        assert "server" not in response.headers
+
+
+def test_allowed_origins_json_array_parses_correctly(monkeypatch: pytest.MonkeyPatch) -> None:
+    """pydantic-settings v2 requires JSON array for list[str] fields.
+
+    Comma-separated string does NOT parse into multiple origins.
+    JSON array format is required.
+
+    Validates: Requirements 1.3, 2.3
+    """
+
+    import src.config as config_module
+
+    # JSON array format — correct (pydantic-settings v2 requires this for list[str])
+    monkeypatch.setenv(
+        "ALLOWED_ORIGINS",
+        '["https://registry.apps.cloud.org.bo", "https://admin.cloud.org.bo"]',
+    )
+    # Re-instantiate Settings to pick up the patched env var
+    s = config_module.Settings(_env_file=None)  # type: ignore[call-arg]
+    assert len(s.allowed_origins) == 2
+    assert "https://registry.apps.cloud.org.bo" in s.allowed_origins
+    assert "https://admin.cloud.org.bo" in s.allowed_origins
