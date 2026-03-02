@@ -93,18 +93,15 @@ jobs:
           version: "latest"
       - run: uv sync --frozen --extra dev
       - name: Generate SBOM
-        run: |
-          uv run cyclonedx-py environment -o sbom.json
-      - name: Install Trivy
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-            | sh -s -- -b /usr/local/bin v0.58.1
+        run: uv run cyclonedx-py environment -o sbom.json
       - name: Scan SBOM with Trivy
-        run: |
-          trivy sbom sbom.json \
-            --severity CRITICAL,HIGH \
-            --ignore-unfixed \
-            --exit-code 1
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: sbom
+          scan-ref: sbom.json
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: 1
 
   secret-scan:
     name: Secret Scan — Gitleaks
