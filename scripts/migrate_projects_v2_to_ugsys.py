@@ -167,9 +167,15 @@ def map_item(old: dict[str, Any]) -> dict[str, Any]:
         if old_key in old:
             new[new_key] = old[old_key]
 
-    # SS passthrough — no type conversion
+    # notification_emails: source may be L (list of {S:...}) or SS — normalize to SS
     if "notificationEmails" in old:
-        new["notification_emails"] = old["notificationEmails"]
+        raw = old["notificationEmails"]
+        if "SS" in raw:
+            new["notification_emails"] = raw  # already a StringSet
+        elif "L" in raw:
+            emails = [entry["S"] for entry in raw["L"] if "S" in entry]
+            if emails:
+                new["notification_emails"] = {"SS": emails}
 
     # BOOL passthrough
     if "enableSubscriptionNotifications" in old:
