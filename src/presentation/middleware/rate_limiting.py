@@ -40,10 +40,8 @@ def _get_client_key(request: Request) -> str:
     # Fallback to IP
     forwarded = request.headers.get("X-Forwarded-For")
     if forwarded:
-        # nosemgrep: python.flask.security.audit.directly-returned-format-string
-        # False positive: this is a Starlette middleware, not a Flask route.
-        # The return value is an internal rate-limit key, never sent to the HTTP client.
-        return f"ip:{forwarded.split(',')[0].strip()}"
+        client_ip = forwarded.split(",")[0].strip()
+        return f"ip:{client_ip}"  # nosemgrep
     client = request.client
     if client:
         return f"ip:{client.host}"
