@@ -92,7 +92,14 @@ class Settings(BaseSettings):
     public_base_url: str = "https://api.cbba.cloud.org.bo/projects"
 
     # ── CORS ────────────────────────────────────────────────────────────────
-    allowed_origins: list[str] = ["https://cbba.cloud.org.bo"]
+    # All browser-facing origins that may call this API.
+    # Override via ALLOWED_ORIGINS env var (comma-separated) in prod.
+    allowed_origins: list[str] = [
+        "https://registry.apps.cloud.org.bo",  # projects registry SPA
+        "https://admin.apps.cloud.org.bo",  # admin panel
+        "https://auth.apps.cloud.org.bo",  # identity manager SPA (if any)
+        "https://messaging.apps.cloud.org.bo",  # omnichannel frontend (future)
+    ]
 
     # ── Operator-configurable (overridable via remote config) ───────────────
     max_subscriptions_per_project: int = 100
