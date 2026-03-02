@@ -7,12 +7,9 @@ Infrastructure layer provides the concrete DynamoDB implementation.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
 
 from src.domain.entities.project import Project
-
-if TYPE_CHECKING:
-    from src.application.queries.project_queries import ProjectListQuery
+from src.domain.queries.project_queries import ProjectListQuery
 
 
 class ProjectRepository(ABC):

@@ -17,7 +17,7 @@ try:
 
     _xray_available = True
 except ImportError:
-    xray_recorder = None  # type: ignore[assignment]
+    xray_recorder = None
     _xray_available = False
 
 

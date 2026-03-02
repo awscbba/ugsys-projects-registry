@@ -24,7 +24,7 @@ try:
 
     _xray_available = True
 except ImportError:
-    xray_recorder = None  # type: ignore[assignment]
+    xray_recorder = None
 
 # TypeVar for the decorator — keeps the wrapped function's signature intact.
 # ANN401 is suppressed via per-file-ignores for this cross-cutting utility.
