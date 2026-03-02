@@ -6,8 +6,8 @@ _raise_repository_error() logs internally and raises RepositoryError with safe u
 
 Table: ugsys-projects-{env}
   PK: PROJECT#{id}  SK: PROJECT
-  GSI-1 (status-index): GSI1PK = STATUS#{status}, GSI1SK = created_at
-  GSI-2 (created_by-index): GSI2PK = OWNER#{created_by}, GSI2SK = created_at
+  GSI-1 (status-index): PK=status (plain value e.g. "active"), SK=created_at
+  GSI-2 (created_by-index): PK=created_by (plain user ULID), SK=created_at
 """
 
 from __future__ import annotations
@@ -108,8 +108,9 @@ class DynamoDBProjectRepository(ProjectRepository):
                 response = await self._client.query(
                     TableName=self._table_name,
                     IndexName="status-index",
-                    KeyConditionExpression="GSI1PK = :status",
-                    ExpressionAttributeValues={":status": {"S": f"STATUS#{status_filter}"}},
+                    KeyConditionExpression="#status = :status",
+                    ExpressionAttributeNames={"#status": "status"},
+                    ExpressionAttributeValues={":status": {"S": status_filter}},
                 )
             else:
                 scan_params: dict[str, Any] = {"TableName": self._table_name}
@@ -219,9 +220,6 @@ class DynamoDBProjectRepository(ProjectRepository):
             "created_by": {"S": project.created_by},
             "created_at": {"S": project.created_at},
             "updated_at": {"S": project.updated_at},
-            # GSI-1 attributes
-            "GSI1PK": {"S": f"STATUS#{project.status.value}"},
-            "GSI1SK": {"S": project.created_at},
         }
         # Optional fields — only write if non-empty/non-None
         if project.rich_text:
@@ -244,10 +242,6 @@ class DynamoDBProjectRepository(ProjectRepository):
             item["migrated_from"] = {"S": project.migrated_from}
         if project.migrated_at:
             item["migrated_at"] = {"S": project.migrated_at}
-        # GSI-2 for created_by queries
-        if project.created_by:
-            item["GSI2PK"] = {"S": f"OWNER#{project.created_by}"}
-            item["GSI2SK"] = {"S": project.created_at}
         return item
 
     def _from_item(self, item: dict[str, Any]) -> Project:
