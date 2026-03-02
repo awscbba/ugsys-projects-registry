@@ -8,10 +8,14 @@ RUN dnf install -y git && dnf clean all
 # Copy dependency manifests first (layer cache)
 COPY pyproject.toml uv.lock ./
 
-# Install production dependencies directly into LAMBDA_TASK_ROOT (no venv)
-RUN UV_PROJECT_ENVIRONMENT="${LAMBDA_TASK_ROOT}" \
-    uv sync --frozen --no-dev --no-install-project \
-    --python /var/lang/bin/python3.13
+# Export lockfile to requirements.txt, then pip install flat into LAMBDA_TASK_ROOT
+RUN uv export --frozen --no-dev --no-hashes --no-emit-project \
+        -o /tmp/requirements.txt \
+    && pip install \
+        --target "${LAMBDA_TASK_ROOT}" \
+        --requirement /tmp/requirements.txt \
+        --quiet \
+    && rm /tmp/requirements.txt
 
 # Copy application source and Lambda entry point
 COPY src/ ${LAMBDA_TASK_ROOT}/src/
