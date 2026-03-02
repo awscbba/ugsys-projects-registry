@@ -50,6 +50,12 @@ jobs:
             --image-uri ${{ steps.build.outputs.image_uri }} \
             --region ${{ env.AWS_REGION }}
 
+      - name: Wait for Lambda update to complete
+        run: |
+          aws lambda wait function-updated \
+            --function-name ugsys-projects-registry-prod \
+            --region ${{ env.AWS_REGION }}
+
       - name: Update Lambda environment variables
         run: |
           aws lambda update-function-configuration \
