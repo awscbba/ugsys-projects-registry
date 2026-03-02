@@ -22,12 +22,7 @@ vi.mock('../stores/authStore', () => ({
   clearTokens: vi.fn(),
 }));
 
-import {
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
-  clearTokens,
-} from '../stores/authStore';
+import { getAccessToken, getRefreshToken, setTokens, clearTokens } from '../stores/authStore';
 import { httpClient, setRefreshTokenFn } from './httpClient';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -67,7 +62,12 @@ describe('Bug condition (b): public 401 with no session tokens', () => {
     originalDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
     Object.defineProperty(window, 'location', {
       configurable: true,
-      value: { ...window.location, set href(v: string) { hrefSetter(v); } },
+      value: {
+        ...window.location,
+        set href(v: string) {
+          hrefSetter(v);
+        },
+      },
     });
 
     // No tokens in memory — fresh page load
@@ -106,23 +106,20 @@ describe('Bug condition (b): public 401 with no session tokens', () => {
   // Property-based: for ANY request path, 401 with no tokens never triggers forceLogout
   it('Property: for any path, 401 with no tokens never sets window.location.href to /login', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        fc.webPath(),
-        async (path) => {
-          vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mock401Response()));
-          vi.mocked(getAccessToken).mockReturnValue(null);
-          vi.mocked(getRefreshToken).mockReturnValue(null);
+      fc.asyncProperty(fc.webPath(), async (path) => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mock401Response()));
+        vi.mocked(getAccessToken).mockReturnValue(null);
+        vi.mocked(getRefreshToken).mockReturnValue(null);
 
-          try {
-            await httpClient.get(path);
-          } catch {
-            // expected
-          }
-
-          expect(hrefSetter).not.toHaveBeenCalledWith('/login');
-          hrefSetter.mockClear();
+        try {
+          await httpClient.get(path);
+        } catch {
+          // expected
         }
-      ),
+
+        expect(hrefSetter).not.toHaveBeenCalledWith('/login');
+        hrefSetter.mockClear();
+      }),
       { numRuns: 20 }
     );
   });
@@ -140,7 +137,12 @@ describe('Preservation: authenticated 401 → refresh → retry flow', () => {
     originalDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
     Object.defineProperty(window, 'location', {
       configurable: true,
-      value: { ...window.location, set href(v: string) { hrefSetter(v); } },
+      value: {
+        ...window.location,
+        set href(v: string) {
+          hrefSetter(v);
+        },
+      },
     });
     vi.clearAllMocks();
   });
@@ -232,28 +234,25 @@ describe('Preservation: authenticated 401 → refresh → retry flow', () => {
   // Property-based: for any refresh token, if refresh fails → forceLogout always called
   it('Property: for any refresh token, failed refresh always triggers forceLogout', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        fc.string({ minLength: 10, maxLength: 100 }),
-        async (refreshToken) => {
-          vi.mocked(getAccessToken).mockReturnValue(null);
-          vi.mocked(getRefreshToken).mockReturnValue(refreshToken);
+      fc.asyncProperty(fc.string({ minLength: 10, maxLength: 100 }), async (refreshToken) => {
+        vi.mocked(getAccessToken).mockReturnValue(null);
+        vi.mocked(getRefreshToken).mockReturnValue(refreshToken);
 
-          const refreshFn = vi.fn().mockRejectedValue(new Error('Refresh failed'));
-          setRefreshTokenFn(refreshFn);
+        const refreshFn = vi.fn().mockRejectedValue(new Error('Refresh failed'));
+        setRefreshTokenFn(refreshFn);
 
-          vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mock401Response()));
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mock401Response()));
 
-          try {
-            await httpClient.get('/api/v1/test');
-          } catch {
-            // expected
-          }
-
-          expect(hrefSetter).toHaveBeenCalledWith('/login');
-          hrefSetter.mockClear();
-          vi.clearAllMocks();
+        try {
+          await httpClient.get('/api/v1/test');
+        } catch {
+          // expected
         }
-      ),
+
+        expect(hrefSetter).toHaveBeenCalledWith('/login');
+        hrefSetter.mockClear();
+        vi.clearAllMocks();
+      }),
       { numRuns: 20 }
     );
   });

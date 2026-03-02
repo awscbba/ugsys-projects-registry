@@ -94,9 +94,7 @@ describe('Bug condition (c): null root element', () => {
 
     // Assert
     expect(threw).toBe(false);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('#root')
-    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('#root'));
 
     // Cleanup
     getElementByIdSpy.mockRestore();
