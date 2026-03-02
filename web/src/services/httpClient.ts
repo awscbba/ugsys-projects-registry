@@ -100,7 +100,12 @@ async function request<T>(
         throw new Error('Session expired. Please log in again.');
       }
     } else {
-      forceLogout();
+      // Only force logout if a session actually existed (at least one token was in memory).
+      // If both tokens are null (fresh page load / public endpoint), just throw to the caller
+      // so hooks like useProjects can set their error state without redirecting the user.
+      if (getAccessToken() !== null || getRefreshToken() !== null) {
+        forceLogout();
+      }
       throw new Error('Session expired. Please log in again.');
     }
   }
