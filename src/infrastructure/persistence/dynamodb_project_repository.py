@@ -172,9 +172,7 @@ class DynamoDBProjectRepository(ProjectRepository):
                     IndexName="status-index",
                     KeyConditionExpression="#status = :status",
                     ExpressionAttributeNames={"#status": "status"},
-                    ExpressionAttributeValues={
-                        ":status": {"S": query.status},
-                    },
+                    ExpressionAttributeValues={":status": {"S": query.status}},
                 )
             else:
                 filter_parts, expr_values = self._build_filter_expression(query)
