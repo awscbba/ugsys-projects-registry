@@ -32,6 +32,7 @@ jobs:
         with:
           target: ${{ github.event.inputs.target_url || 'https://api.apps.cloud.org.bo/api/v1/projects' }}
           rules_file_name: ".zap/rules.tsv"
+          artifact_name: zap_scan
           fail_action: true
           allow_issue_writing: false
           artifact_name: zap_scan
@@ -44,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Nuclei
-        uses: projectdiscovery/nuclei-action@main
+        uses: projectdiscovery/nuclei-action@v3
         with:
           target: ${{ github.event.inputs.target_url || 'https://api.apps.cloud.org.bo/api/v1/projects' }}
           flags: "-severity critical -stats"
