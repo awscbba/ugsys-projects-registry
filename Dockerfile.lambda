@@ -1,0 +1,20 @@
+FROM public.ecr.aws/lambda/python:3.13
+
+# Install uv for dependency resolution
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Export pinned requirements (resolves git sources for shared libs) and install
+# --no-dev: exclude test/lint tools
+# --no-hashes: pip on Lambda base image doesn't support hash-checking with git sources
+# --frozen: fail if lockfile is out of sync
+RUN uv export --no-dev --no-hashes --frozen -o /tmp/requirements.txt \
+    && pip install -r /tmp/requirements.txt --target "${LAMBDA_TASK_ROOT}" --quiet
+
+# Copy application source
+COPY src/ ${LAMBDA_TASK_ROOT}/src/
+COPY handler.py ${LAMBDA_TASK_ROOT}/
+
+CMD ["handler.handler"]

@@ -1,0 +1,163 @@
+name: CI
+
+on:
+  push:
+    branches: ["feature/**"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+  security-events: write
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - run: uv sync --frozen --extra dev
+      - run: uv run ruff check src/ tests/
+      - run: uv run ruff format --check src/ tests/
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - run: uv sync --frozen --extra dev
+      - run: uv run mypy src/ --strict
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - run: uv sync --frozen --extra dev
+      - run: uv run pytest tests/unit/ -v --tb=short --cov=src --cov-report=xml --cov-fail-under=80
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  sast:
+    name: SAST — Bandit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - run: uv sync --frozen --extra dev
+      - run: uv run bandit -r src/ -c pyproject.toml -ll
+
+  sast-semgrep:
+    name: SAST — Semgrep
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep scan --config p/python --config p/security-audit --config p/owasp-top-ten --config p/secrets --error src/
+
+  dependency-scan:
+    name: Dependency Scan — Safety
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - run: uv sync --frozen --extra dev
+      - run: uv run safety check || true
+
+  sbom:
+    name: SBOM + CVE Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - run: uv sync --frozen --extra dev
+      - name: Generate SBOM
+        run: uv run cyclonedx-py environment -o sbom.json
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -qq && sudo apt-get install -y trivy
+      - name: Scan SBOM with Trivy
+        run: |
+          trivy sbom sbom.json \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --exit-code 1
+
+  secret-scan:
+    name: Secret Scan — Gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Gitleaks
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz \
+            | tar -xz && sudo mv gitleaks /usr/local/bin/
+      - name: Run Gitleaks
+        run: gitleaks detect --source . --log-opts="--all" --redact
+
+  arch-guard:
+    name: Architecture Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check domain layer has no infra/presentation/application imports
+        run: |
+          # Exclude TYPE_CHECKING blocks — those are type-only, not runtime imports
+          if grep -rn "from src.infrastructure\|from src.presentation\|from src.application" src/domain/ \
+            | grep -v "TYPE_CHECKING" \
+            | grep -v "^.*#.*type:"; then
+            echo "❌ Domain layer imports from infra/presentation/application — architecture violation"
+            exit 1
+          fi
+          echo "✅ Domain layer is clean"
+      - name: Check application layer has no infra/presentation imports
+        run: |
+          if grep -rn "from src.infrastructure\|from src.presentation" src/application/ \
+            | grep -v "TYPE_CHECKING" \
+            | grep -v "^.*#.*type:"; then
+            echo "❌ Application layer imports from infra/presentation — architecture violation"
+            exit 1
+          fi
+          echo "✅ Application layer is clean"
+
+  notify-failure:
+    name: Notify Failure
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test, sast, sast-semgrep, sbom, secret-scan, arch-guard]
+    if: failure()
+    steps:
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: |
+            ❌ CI failed on `${{ github.repository }}` — branch `${{ github.ref_name }}`
+            Workflow: ${{ github.workflow }} | Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

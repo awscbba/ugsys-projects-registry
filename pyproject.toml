@@ -1,0 +1,114 @@
+[project]
+name = "ugsys-projects-registry"
+version = "0.1.0"
+description = "Project catalog and volunteer subscription management service for the ugsys platform"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic[email]>=2.7",
+    "pydantic-settings>=2.3",
+    "aioboto3>=13.0",
+    "httpx>=0.27",
+    "mangum>=0.17",
+    "python-ulid>=3.0",
+    "structlog>=24.1",
+    "ugsys-auth-client",
+    "ugsys-logging-lib",
+    "ugsys-event-lib",
+    "aws-xray-sdk>=2.14",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=5.0",
+    "httpx>=0.27",
+    "hypothesis>=6.100",
+    "moto[dynamodb,events,s3]>=5.0",
+    "ruff>=0.4",
+    "mypy>=1.10",
+    "boto3-stubs[dynamodb,events,s3]>=1.34",
+    "bandit[toml]>=1.7",
+    "safety>=3.2",
+    "cyclonedx-bom>=4.0",
+]
+logging = ["ugsys-logging-lib"]
+
+[tool.uv.sources]
+ugsys-auth-client = { git = "https://github.com/awscbba/ugsys-shared-libs", tag = "auth-client/v0.2.0", subdirectory = "auth-client" }
+ugsys-logging-lib = { git = "https://github.com/awscbba/ugsys-shared-libs", tag = "logging-lib/v0.1.0", subdirectory = "logging-lib" }
+ugsys-event-lib   = { git = "https://github.com/awscbba/ugsys-shared-libs", tag = "event-lib/v0.1.0", subdirectory = "event-lib" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "S", "ANN", "RUF"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "ANN", "E501"]
+"src/presentation/api/v1/*.py" = ["B008"]  # FastAPI Depends() in function defaults is intentional
+"src/main.py" = ["E402"]  # configure_logging() must run before other imports
+"src/infrastructure/adapters/s3_client.py" = ["ANN401"]  # aioboto3 client has no stub type
+"src/presentation/event_consumer.py" = ["ANN401"]  # Lambda context has no stub type
+"src/application/tracing.py" = ["ANN401", "UP047"]  # cross-cutting tracing utility needs Any for generics
+"src/presentation/middleware/xray_middleware.py" = ["ANN401"]  # Starlette app param is Any
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
+skips = ["B101"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "--cov=src --cov-report=term-missing --cov-fail-under=80"
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "src/main.py",
+    "src/infrastructure/persistence/*",
+    "src/infrastructure/logging.py",
+    "src/infrastructure/adapters/*",
+    "src/infrastructure/messaging/*",
+    "src/presentation/api/v1/*.py",
+    "src/presentation/auth.py",
+    "src/presentation/envelope.py",
+    "src/presentation/event_consumer.py",
+    "src/presentation/dependencies.py",
+    "src/presentation/middleware/*.py",
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["mangum.*", "aioboto3.*", "moto.*", "boto3.*", "botocore.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["aws_xray_sdk.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["ugsys_auth_client.*", "ugsys_logging_lib.*", "ugsys_event_lib.*"]
+ignore_missing_imports = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]

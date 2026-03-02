@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
+  "packages": [
+    "awscli2@latest",
+    "python@latest",
+    "uv",
+    "jq@latest",
+    "yq@latest",
+    "just@latest",
+    "nodejs@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo 'ugsys-projects-registry monorepo'"
+    ]
+  }
+}
