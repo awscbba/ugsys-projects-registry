@@ -174,12 +174,13 @@ class TestSecurityHeadersMiddleware:
                 for header in _REQUIRED_HEADERS:
                     assert header in response.headers
 
-    async def test_cross_origin_resource_policy_not_set(self, app: FastAPI) -> None:
-        """CORP must not be set on API responses — it would block cross-origin SPA fetches."""
+    async def test_cross_origin_resource_policy_is_cross_origin(self, app: FastAPI) -> None:
+        """CORP must be 'cross-origin' to allow the frontend SPA to read API responses.
+        ZAP rule 90004 requires this header to be present and valid."""
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/ping")
 
-        assert "cross-origin-resource-policy" not in response.headers
+        assert response.headers.get("cross-origin-resource-policy") == "cross-origin"
 
     async def test_options_preflight_passes_through_without_security_headers(
         self, app: FastAPI

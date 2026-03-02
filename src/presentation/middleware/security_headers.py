@@ -17,9 +17,9 @@ _SECURITY_HEADERS: dict[str, str] = {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
     "Cross-Origin-Opener-Policy": "same-origin",
-    # Cross-Origin-Resource-Policy intentionally omitted for API services:
-    # "same-origin" would block cross-origin fetch from the frontend SPA.
-    # CORS headers (Access-Control-Allow-Origin) are the correct mechanism here.
+    # cross-origin allows the frontend SPA (different origin) to fetch API responses.
+    # same-origin would block all cross-origin reads, breaking the SPA.
+    "Cross-Origin-Resource-Policy": "cross-origin",
 }
 
 _CACHE_CONTROL = "no-store, no-cache, must-revalidate"
