@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import field_validator
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # ---------------------------------------------------------------------------
@@ -94,25 +94,34 @@ class Settings(BaseSettings):
 
     # ── CORS ────────────────────────────────────────────────────────────────
     # All browser-facing origins that may call this API.
-    # Override via ALLOWED_ORIGINS env var (comma-separated) in prod.
-    allowed_origins: list[str] = [
-        "https://registry.apps.cloud.org.bo",  # projects registry SPA
-        "https://admin.apps.cloud.org.bo",  # admin panel
-        "https://auth.apps.cloud.org.bo",  # identity manager SPA (if any)
-        "https://messaging.apps.cloud.org.bo",  # omnichannel frontend (future)
-    ]
+    # Override via ALLOWED_ORIGINS env var (comma-separated or JSON array) in prod.
+    # Stored as a raw string; use .allowed_origins_list for the parsed list.
+    allowed_origins: str = (
+        "https://registry.apps.cloud.org.bo,"
+        "https://admin.apps.cloud.org.bo,"
+        "https://auth.apps.cloud.org.bo,"
+        "https://messaging.apps.cloud.org.bo"
+    )
 
-    @field_validator("allowed_origins", mode="before")
-    @classmethod
-    def parse_allowed_origins(cls, v: object) -> list[str]:
-        """Support comma-separated string from Lambda env vars, e.g.
-        ALLOWED_ORIGINS=https://a.example.com,https://b.example.com
+    @property
+    def allowed_origins_list(self) -> list[str]:
+        """Parse allowed_origins string into a list.
+        Supports comma-separated: https://a.com,https://b.com
+        Supports JSON array:      ["https://a.com","https://b.com"]
         """
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        if isinstance(v, list):
-            return [str(item) for item in v]
-        return []
+        import json
+
+        v = self.allowed_origins.strip()
+        if v.startswith("["):
+            parsed: list[str] = json.loads(v)
+            return parsed
+        return [o.strip() for o in v.split(",") if o.strip()]
+
+    @model_validator(mode="before")
+    @classmethod
+    def parse_comma_separated_lists(cls, values: object) -> object:
+        """No-op — kept for backward compat, parsing moved to allowed_origins_list property."""
+        return values
 
     # ── Operator-configurable (overridable via remote config) ───────────────
     max_subscriptions_per_project: int = 100
