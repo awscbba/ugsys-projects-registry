@@ -52,68 +52,24 @@ jobs:
 
       - name: Notify success
         if: success()
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v1
         with:
-          method: chat.postMessage
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          payload: |
-            {
-              "channel": "C0AE6QV0URH",
-              "username": "ugsys CI/CD",
-              "icon_emoji": ":rocket:",
-              "text": "🚀 Deployed — ugsys-projects-registry",
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {"type": "plain_text", "text": "🚀 Deployed — ugsys-projects-registry (prod)", "emoji": true}
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {"type": "mrkdwn", "text": "*Commit:*\n`${{ github.sha }}`"},
-                    {"type": "mrkdwn", "text": "*By:*\n${{ github.actor }}"}
-                  ]
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {"type": "button", "text": {"type": "plain_text", "text": "View Run"},
-                     "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}
-                  ]
-                }
-              ]
-            }
+          channel-id: "C0AE6QV0URH"
+          slack-message: |
+            :rocket: *Deployed — ugsys-projects-registry (prod)*
+            Commit: `${{ github.sha }}` by ${{ github.actor }}
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Notify failure
         if: failure()
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v1
         with:
-          method: chat.postMessage
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          payload: |
-            {
-              "channel": "C0AE6QV0URH",
-              "username": "ugsys CI/CD",
-              "icon_emoji": ":x:",
-              "text": "❌ Deploy Failed — ugsys-projects-registry",
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {"type": "plain_text", "text": "❌ Deploy Failed — ugsys-projects-registry", "emoji": true}
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {"type": "mrkdwn", "text": "*Commit:*\n`${{ github.sha }}`"},
-                    {"type": "mrkdwn", "text": "*By:*\n${{ github.actor }}"}
-                  ]
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {"type": "button", "text": {"type": "plain_text", "text": "View Run"},
-                     "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}
-                  ]
-                }
-              ]
-            }
+          channel-id: "C0AE6QV0URH"
+          slack-message: |
+            :x: *Deploy FAILED — ugsys-projects-registry (prod)*
+            Commit: `${{ github.sha }}` by ${{ github.actor }}
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
