@@ -107,7 +107,8 @@ _REQUIRED_HEADERS = [
     "referrer-policy",
     "permissions-policy",
     "cross-origin-opener-policy",
-    "cross-origin-resource-policy",
+    # cross-origin-resource-policy intentionally excluded: would block cross-origin
+    # fetch from the frontend SPA. CORS headers are the correct mechanism for APIs.
 ]
 
 
@@ -172,6 +173,26 @@ class TestSecurityHeadersMiddleware:
                 response = await client.get("/ping")
                 for header in _REQUIRED_HEADERS:
                     assert header in response.headers
+
+    async def test_cross_origin_resource_policy_not_set(self, app: FastAPI) -> None:
+        """CORP must not be set on API responses — it would block cross-origin SPA fetches."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.get("/ping")
+
+        assert "cross-origin-resource-policy" not in response.headers
+
+    async def test_options_preflight_passes_through_without_security_headers(
+        self, app: FastAPI
+    ) -> None:
+        """OPTIONS requests must not have security headers injected — CORSMiddleware owns them."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.options("/ping")
+
+        # Security headers must NOT be present on preflight responses
+        for header in _REQUIRED_HEADERS:
+            assert header not in response.headers, (
+                f"Security header '{header}' must not be set on OPTIONS preflight"
+            )
 
 
 # ── RateLimitMiddleware ───────────────────────────────────────────────────────

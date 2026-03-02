@@ -17,7 +17,9 @@ _SECURITY_HEADERS: dict[str, str] = {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
     "Cross-Origin-Opener-Policy": "same-origin",
-    "Cross-Origin-Resource-Policy": "same-origin",
+    # Cross-Origin-Resource-Policy intentionally omitted for API services:
+    # "same-origin" would block cross-origin fetch from the frontend SPA.
+    # CORS headers (Access-Control-Allow-Origin) are the correct mechanism here.
 }
 
 _CACHE_CONTROL = "no-store, no-cache, must-revalidate"
@@ -27,6 +29,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
+        # Pass OPTIONS preflight requests straight through — CORSMiddleware handles them.
+        # Adding security headers to a preflight response can cause browsers to reject it.
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         response = await call_next(request)
         for header, value in _SECURITY_HEADERS.items():
             response.headers[header] = value
