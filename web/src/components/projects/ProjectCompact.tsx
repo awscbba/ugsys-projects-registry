@@ -1,18 +1,18 @@
-import { useNavigate } from "react-router-dom";
-import type { Project, ProjectStatus } from "@/types/project";
+import { useNavigate } from 'react-router-dom';
+import type { Project, ProjectStatus } from '@/types/project';
 
 const STATUS_STYLES: Record<ProjectStatus, string> = {
-  pending: "bg-gray-100 text-gray-700",
-  active: "bg-green-100 text-green-700",
-  completed: "bg-blue-100 text-blue-700",
-  cancelled: "bg-red-100 text-red-700",
+  pending: 'bg-gray-100 text-gray-700',
+  active: 'bg-green-100 text-green-700',
+  completed: 'bg-blue-100 text-blue-700',
+  cancelled: 'bg-red-100 text-red-700',
 };
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
-  pending: "Pendiente",
-  active: "Activo",
-  completed: "Completado",
-  cancelled: "Cancelado",
+  pending: 'Pendiente',
+  active: 'Activo',
+  completed: 'Completado',
+  cancelled: 'Cancelado',
 };
 
 interface ProjectCompactProps {

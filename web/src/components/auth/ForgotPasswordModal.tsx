@@ -1,16 +1,13 @@
-import { useState } from "react";
-import { authService } from "../../services/authService";
+import { useState } from 'react';
+import { authService } from '../../services/authService';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function ForgotPasswordModal({
-  isOpen,
-  onClose,
-}: ForgotPasswordModalProps) {
-  const [email, setEmail] = useState("");
+export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProps) {
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,14 +22,14 @@ export function ForgotPasswordModal({
       await authService.forgotPassword(email);
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ocurrió un error");
+      setError(err instanceof Error ? err.message : 'Ocurrió un error');
     } finally {
       setIsLoading(false);
     }
   }
 
   function handleClose() {
-    setEmail("");
+    setEmail('');
     setSuccess(false);
     setError(null);
     onClose();
@@ -48,9 +45,7 @@ export function ForgotPasswordModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Recuperar contraseña
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900">Recuperar contraseña</h2>
           <button
             type="button"
             onClick={handleClose}
@@ -63,8 +58,7 @@ export function ForgotPasswordModal({
 
         {success ? (
           <div className="rounded-md bg-green-50 p-4 text-sm text-green-800">
-            Revisa tu correo. Te enviamos un enlace para restablecer tu
-            contraseña.
+            Revisa tu correo. Te enviamos un enlace para restablecer tu contraseña.
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate>
@@ -86,16 +80,14 @@ export function ForgotPasswordModal({
               />
             </div>
 
-            {error && (
-              <p className="mb-3 text-sm text-red-600">{error}</p>
-            )}
+            {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
             <button
               type="submit"
               disabled={isLoading}
               className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              {isLoading ? "Enviando..." : "Enviar enlace"}
+              {isLoading ? 'Enviando...' : 'Enviar enlace'}
             </button>
           </form>
         )}

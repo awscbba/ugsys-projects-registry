@@ -84,12 +84,7 @@ export default function SubscribePage() {
             stroke="currentColor"
             aria-hidden="true"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
           <h1 className="text-xl font-semibold text-gray-900">¡Te has suscrito exitosamente!</h1>
           <p className="text-sm text-gray-600">Tu solicitud está pendiente de aprobación.</p>

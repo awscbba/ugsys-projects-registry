@@ -35,9 +35,7 @@ function makeJwt(sub: string, email: string, expOffset = 3600): string {
 
 describe('authStore unit', () => {
   it('setTokens and getAccessToken / getRefreshToken round-trip', async () => {
-    const { setTokens, getAccessToken, getRefreshToken, clearTokens } = await import(
-      './authStore'
-    );
+    const { setTokens, getAccessToken, getRefreshToken, clearTokens } = await import('./authStore');
     setTokens('acc-123', 'ref-456');
     expect(getAccessToken()).toBe('acc-123');
     expect(getRefreshToken()).toBe('ref-456');
@@ -99,27 +97,23 @@ describe('authStore token security', () => {
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
 
     await fc.assert(
-      fc.asyncProperty(
-        fc.emailAddress(),
-        fc.string({ minLength: 8 }),
-        async (email, password) => {
-          setItemSpy.mockClear();
-          const accessToken = makeJwt('u1', email);
-          vi.mocked(authService.login).mockResolvedValue({
-            access_token: accessToken,
-            refresh_token: 'refresh-token',
-            expires_in: 3600,
-          });
+      fc.asyncProperty(fc.emailAddress(), fc.string({ minLength: 8 }), async (email, password) => {
+        setItemSpy.mockClear();
+        const accessToken = makeJwt('u1', email);
+        vi.mocked(authService.login).mockResolvedValue({
+          access_token: accessToken,
+          refresh_token: 'refresh-token',
+          expires_in: 3600,
+        });
 
-          await login(email, password);
+        await login(email, password);
 
-          // authStore must NOT write tokens to localStorage
-          const tokenCalls = setItemSpy.mock.calls.filter(
-            ([key]) => key === 'access_token' || key === 'refresh_token'
-          );
-          expect(tokenCalls).toHaveLength(0);
-        }
-      ),
+        // authStore must NOT write tokens to localStorage
+        const tokenCalls = setItemSpy.mock.calls.filter(
+          ([key]) => key === 'access_token' || key === 'refresh_token'
+        );
+        expect(tokenCalls).toHaveLength(0);
+      }),
       { numRuns: 20 }
     );
 

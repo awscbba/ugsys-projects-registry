@@ -1,24 +1,21 @@
-import { useState, useEffect } from "react";
-import ViewToggle, { loadSavedView } from "@/components/projects/ViewToggle";
-import ProjectGrid from "@/components/projects/ProjectGrid";
-import ProjectList from "@/components/projects/ProjectList";
-import ProjectCompact from "@/components/projects/ProjectCompact";
-import { usePagination } from "@/hooks/usePagination";
-import { useProjects } from "@/hooks/useProjects";
+import { useState, useEffect } from 'react';
+import ViewToggle, { loadSavedView } from '@/components/projects/ViewToggle';
+import ProjectGrid from '@/components/projects/ProjectGrid';
+import ProjectList from '@/components/projects/ProjectList';
+import ProjectCompact from '@/components/projects/ProjectCompact';
+import { usePagination } from '@/hooks/usePagination';
+import { useProjects } from '@/hooks/useProjects';
 
-type View = "grid" | "list" | "compact";
+type View = 'grid' | 'list' | 'compact';
 
 const PAGE_SIZE = 12;
 
 export default function HomePage() {
-  const [view, setView] = useState<View>(() => loadSavedView("grid"));
+  const [view, setView] = useState<View>(() => loadSavedView('grid'));
   const [total, setTotal] = useState(0);
 
   const { page, totalPages, next, prev } = usePagination(total, PAGE_SIZE);
-  const { projects, total: fetchedTotal, isLoading, error } = useProjects(
-    page,
-    PAGE_SIZE,
-  );
+  const { projects, total: fetchedTotal, isLoading, error } = useProjects(page, PAGE_SIZE);
 
   useEffect(() => {
     if (fetchedTotal !== total) {
@@ -27,10 +24,7 @@ export default function HomePage() {
   }, [fetchedTotal, total]);
 
   return (
-    <main
-      className="max-w-7xl mx-auto px-4 py-8"
-      aria-label="Catálogo de proyectos"
-    >
+    <main className="max-w-7xl mx-auto px-4 py-8" aria-label="Catálogo de proyectos">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Proyectos</h1>
@@ -63,16 +57,14 @@ export default function HomePage() {
         )}
 
         {!isLoading && !error && projects.length === 0 && (
-          <p className="text-center text-gray-500 py-16">
-            No hay proyectos disponibles
-          </p>
+          <p className="text-center text-gray-500 py-16">No hay proyectos disponibles</p>
         )}
 
         {!isLoading && !error && projects.length > 0 && (
           <>
-            {view === "grid" && <ProjectGrid projects={projects} />}
-            {view === "list" && <ProjectList projects={projects} />}
-            {view === "compact" && <ProjectCompact projects={projects} />}
+            {view === 'grid' && <ProjectGrid projects={projects} />}
+            {view === 'list' && <ProjectList projects={projects} />}
+            {view === 'compact' && <ProjectCompact projects={projects} />}
 
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-4 mt-8">

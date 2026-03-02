@@ -1,5 +1,5 @@
-export type ProjectStatus = "pending" | "active" | "completed" | "cancelled";
-export type SubscriptionStatus = "pending" | "active" | "rejected" | "cancelled";
+export type ProjectStatus = 'pending' | 'active' | 'completed' | 'cancelled';
+export type SubscriptionStatus = 'pending' | 'active' | 'rejected' | 'cancelled';
 
 export interface ProjectImage {
   image_id: string;

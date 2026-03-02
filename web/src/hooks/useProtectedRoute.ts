@@ -1,7 +1,7 @@
-import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useStore } from "@nanostores/react";
-import { $isAuthenticated } from "../stores/authStore";
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useStore } from '@nanostores/react';
+import { $isAuthenticated } from '../stores/authStore';
 
 export function useProtectedRoute(): boolean {
   const isAuthenticated = useStore($isAuthenticated);
@@ -10,10 +10,7 @@ export function useProtectedRoute(): boolean {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate(
-        `/login?redirect=${encodeURIComponent(location.pathname)}`,
-        { replace: true },
-      );
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`, { replace: true });
     }
   }, [isAuthenticated, navigate, location.pathname]);
 

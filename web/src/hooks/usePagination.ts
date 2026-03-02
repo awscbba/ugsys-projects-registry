@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 export function usePagination(total: number, pageSize: number) {
   const [page, setPage] = useState(1);

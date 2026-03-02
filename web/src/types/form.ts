@@ -1,10 +1,4 @@
-export type FieldType =
-  | "text"
-  | "textarea"
-  | "poll_single"
-  | "poll_multiple"
-  | "date"
-  | "number";
+export type FieldType = 'text' | 'textarea' | 'poll_single' | 'poll_multiple' | 'date' | 'number';
 
 export interface CustomField {
   id: string;

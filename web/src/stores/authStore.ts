@@ -1,6 +1,6 @@
-import { atom, computed } from "nanostores";
-import type { AuthUser, TokenPair } from "../types/auth";
-import { authService } from "../services/authService";
+import { atom, computed } from 'nanostores';
+import type { AuthUser, TokenPair } from '../types/auth';
+import { authService } from '../services/authService';
 
 // ── In-memory token storage — never written to localStorage ──────────────────
 
@@ -32,21 +32,21 @@ export function clearTokens(): void {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function decodeJwtPayload(token: string): Record<string, unknown> {
-  const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
   return JSON.parse(atob(base64));
 }
 
 function extractUser(token: string): AuthUser | null {
   try {
     const payload = decodeJwtPayload(token);
-    const exp = payload["exp"];
-    if (typeof exp === "number" && exp * 1000 < Date.now()) {
+    const exp = payload['exp'];
+    if (typeof exp === 'number' && exp * 1000 < Date.now()) {
       return null; // expired
     }
-    const sub = payload["sub"];
-    const email = payload["email"];
-    const roles = payload["roles"] ?? payload["cognito:groups"] ?? [];
-    if (typeof sub !== "string" || typeof email !== "string") {
+    const sub = payload['sub'];
+    const email = payload['email'];
+    const roles = payload['roles'] ?? payload['cognito:groups'] ?? [];
+    if (typeof sub !== 'string' || typeof email !== 'string') {
       return null;
     }
     return {
@@ -101,10 +101,10 @@ export async function logout(): Promise<void> {
   $user.set(null);
   try {
     // Import lazily to avoid circular dependency (httpClient imports authStore)
-    const { httpClient } = await import("../services/httpClient");
-    await httpClient.post("/api/v1/auth/logout");
+    const { httpClient } = await import('../services/httpClient');
+    await httpClient.post('/api/v1/auth/logout');
   } catch {
     // best-effort — session already cleared client-side
   }
-  window.location.href = "/";
+  window.location.href = '/';
 }

@@ -32,10 +32,7 @@ function makeProject(id: string): Project {
   };
 }
 
-function makePaginatedResponse(
-  items: Project[],
-  total: number
-): PaginatedResponse<Project> {
+function makePaginatedResponse(items: Project[], total: number): PaginatedResponse<Project> {
   return {
     data: items,
     meta: { page: 1, page_size: items.length, total, total_pages: 1, request_id: 'req-1' },
@@ -118,9 +115,7 @@ describe('useProjects', () => {
         fc.integer({ min: 1, max: 50 }),
         async (page, pageSize) => {
           const api = makeMockApi({
-            getPublicProjects: vi
-              .fn()
-              .mockResolvedValue(makePaginatedResponse([], 0)),
+            getPublicProjects: vi.fn().mockResolvedValue(makePaginatedResponse([], 0)),
           });
           renderHook(() => useProjects(page, pageSize, api));
 

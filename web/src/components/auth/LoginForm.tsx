@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { login } from "../../stores/authStore";
-import { ForgotPasswordModal } from "./ForgotPasswordModal";
+import { useState } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { login } from '../../stores/authStore';
+import { ForgotPasswordModal } from './ForgotPasswordModal';
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForgot, setShowForgot] = useState(false);
@@ -19,10 +19,10 @@ export function LoginForm() {
     setError(null);
     try {
       await login(email, password);
-      const redirect = searchParams.get("redirect") ?? "/dashboard";
+      const redirect = searchParams.get('redirect') ?? '/dashboard';
       navigate(redirect, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Credenciales inválidas");
+      setError(err instanceof Error ? err.message : 'Credenciales inválidas');
     } finally {
       setIsLoading(false);
     }
@@ -32,10 +32,7 @@ export function LoginForm() {
     <>
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <div>
-          <label
-            htmlFor="login-email"
-            className="mb-1 block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="login-email" className="mb-1 block text-sm font-medium text-gray-700">
             Correo electrónico
           </label>
           <input
@@ -51,10 +48,7 @@ export function LoginForm() {
         </div>
 
         <div>
-          <label
-            htmlFor="login-password"
-            className="mb-1 block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="login-password" className="mb-1 block text-sm font-medium text-gray-700">
             Contraseña
           </label>
           <input
@@ -75,7 +69,7 @@ export function LoginForm() {
           disabled={isLoading}
           className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {isLoading ? "Ingresando..." : "Iniciar sesión"}
+          {isLoading ? 'Ingresando...' : 'Iniciar sesión'}
         </button>
 
         <div className="flex items-center justify-between text-sm">
@@ -92,10 +86,7 @@ export function LoginForm() {
         </div>
       </form>
 
-      <ForgotPasswordModal
-        isOpen={showForgot}
-        onClose={() => setShowForgot(false)}
-      />
+      <ForgotPasswordModal isOpen={showForgot} onClose={() => setShowForgot(false)} />
     </>
   );
 }

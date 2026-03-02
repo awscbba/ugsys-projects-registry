@@ -1,6 +1,6 @@
-const STORAGE_KEY = "projects_view";
+const STORAGE_KEY = 'projects_view';
 
-type View = "grid" | "list" | "compact";
+type View = 'grid' | 'list' | 'compact';
 
 interface ViewToggleProps {
   view: View;
@@ -9,26 +9,26 @@ interface ViewToggleProps {
 
 const OPTIONS: { value: View; label: string; icon: string }[] = [
   {
-    value: "grid",
-    label: "Grid",
-    icon: "M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z",
+    value: 'grid',
+    label: 'Grid',
+    icon: 'M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z',
   },
   {
-    value: "list",
-    label: "Lista",
-    icon: "M4 6h16M4 12h16M4 18h16",
+    value: 'list',
+    label: 'Lista',
+    icon: 'M4 6h16M4 12h16M4 18h16',
   },
   {
-    value: "compact",
-    label: "Compacto",
-    icon: "M4 6h16M4 10h16M4 14h16M4 18h16",
+    value: 'compact',
+    label: 'Compacto',
+    icon: 'M4 6h16M4 10h16M4 14h16M4 18h16',
   },
 ];
 
-export function loadSavedView(defaultView: View = "grid"): View {
+export function loadSavedView(defaultView: View = 'grid'): View {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "grid" || saved === "list" || saved === "compact") {
+    if (saved === 'grid' || saved === 'list' || saved === 'compact') {
       return saved;
     }
   } catch {
@@ -64,9 +64,7 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
             title={label}
             onClick={() => handleChange(value)}
             className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 ${
-              active
-                ? "bg-indigo-600 text-white"
-                : "bg-white text-gray-600 hover:bg-gray-50"
+              active ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
           >
             <svg

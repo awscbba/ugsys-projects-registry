@@ -1,8 +1,8 @@
-import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import { useAuth } from "@/hooks/useAuth";
-import ProfileSection from "@/components/dashboard/ProfileSection";
-import PasswordChange from "@/components/dashboard/PasswordChange";
-import SubscriptionList from "@/components/dashboard/SubscriptionList";
+import { useProtectedRoute } from '@/hooks/useProtectedRoute';
+import { useAuth } from '@/hooks/useAuth';
+import ProfileSection from '@/components/dashboard/ProfileSection';
+import PasswordChange from '@/components/dashboard/PasswordChange';
+import SubscriptionList from '@/components/dashboard/SubscriptionList';
 
 export default function DashboardPage() {
   useProtectedRoute();
@@ -28,9 +28,7 @@ export default function DashboardPage() {
         {/* Right column */}
         <div className="lg:col-span-2">
           <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-4 text-base font-semibold text-gray-800">
-              Mis suscripciones
-            </h2>
+            <h2 className="mb-4 text-base font-semibold text-gray-800">Mis suscripciones</h2>
             <SubscriptionList personId={user.sub} />
           </div>
         </div>

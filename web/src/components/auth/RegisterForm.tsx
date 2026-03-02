@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { authService } from "../../services/authService";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { authService } from '../../services/authService';
 
 export function RegisterForm() {
-  const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,9 +17,9 @@ export function RegisterForm() {
     setError(null);
     try {
       await authService.register({ email, full_name: fullName, password });
-      navigate("/login", { replace: true });
+      navigate('/login', { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al crear la cuenta");
+      setError(err instanceof Error ? err.message : 'Error al crear la cuenta');
     } finally {
       setIsLoading(false);
     }
@@ -28,10 +28,7 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
       <div>
-        <label
-          htmlFor="register-email"
-          className="mb-1 block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="register-email" className="mb-1 block text-sm font-medium text-gray-700">
           Correo electrónico
         </label>
         <input
@@ -47,10 +44,7 @@ export function RegisterForm() {
       </div>
 
       <div>
-        <label
-          htmlFor="register-fullname"
-          className="mb-1 block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="register-fullname" className="mb-1 block text-sm font-medium text-gray-700">
           Nombre completo
         </label>
         <input
@@ -66,10 +60,7 @@ export function RegisterForm() {
       </div>
 
       <div>
-        <label
-          htmlFor="register-password"
-          className="mb-1 block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="register-password" className="mb-1 block text-sm font-medium text-gray-700">
           Contraseña
         </label>
         <input
@@ -90,11 +81,11 @@ export function RegisterForm() {
         disabled={isLoading}
         className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        {isLoading ? "Creando cuenta..." : "Crear cuenta"}
+        {isLoading ? 'Creando cuenta...' : 'Crear cuenta'}
       </button>
 
       <p className="text-center text-sm text-gray-600">
-        ¿Ya tienes cuenta?{" "}
+        ¿Ya tienes cuenta?{' '}
         <Link to="/login" className="text-blue-600 hover:underline">
           Iniciar sesión
         </Link>

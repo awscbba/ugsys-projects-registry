@@ -1,9 +1,9 @@
-import { useState } from "react";
-import type { FormSchema } from "@/types/form";
-import DynamicFormRenderer from "@/components/forms/DynamicFormRenderer";
-import { subscriptionApi } from "@/services/subscriptionApi";
-import { formApi } from "@/services/formApi";
-import { useAuth } from "@/hooks/useAuth";
+import { useState } from 'react';
+import type { FormSchema } from '@/types/form';
+import DynamicFormRenderer from '@/components/forms/DynamicFormRenderer';
+import { subscriptionApi } from '@/services/subscriptionApi';
+import { formApi } from '@/services/formApi';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SubscriptionFormProps {
   projectId: string;
@@ -21,16 +21,16 @@ export default function SubscriptionForm({
   const { user } = useAuth();
 
   // Shared state
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState('');
   const [formValues, setFormValues] = useState<Record<string, string | string[]>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
   // Public-only state
-  const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
   function handleFieldChange(fieldId: string, value: string | string[]) {
     setFormValues((prev) => ({ ...prev, [fieldId]: value }));
@@ -49,12 +49,9 @@ export default function SubscriptionForm({
     for (const field of formSchema.fields) {
       if (!field.required) continue;
       const val = formValues[field.id];
-      const isEmpty =
-        val === undefined ||
-        val === "" ||
-        (Array.isArray(val) && val.length === 0);
+      const isEmpty = val === undefined || val === '' || (Array.isArray(val) && val.length === 0);
       if (isEmpty) {
-        errors[field.id] = "Este campo es obligatorio";
+        errors[field.id] = 'Este campo es obligatorio';
       }
     }
     setFieldErrors(errors);
@@ -76,8 +73,7 @@ export default function SubscriptionForm({
 
       onSuccess({ subscription_id: sub.id });
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Error al procesar la suscripción";
+      const msg = err instanceof Error ? err.message : 'Error al procesar la suscripción';
       setApiError(msg);
     } finally {
       setIsSubmitting(false);
@@ -89,9 +85,9 @@ export default function SubscriptionForm({
 
     // Client-side validation
     const errors: Record<string, string> = {};
-    if (!email.trim()) errors["email"] = "El correo es obligatorio";
-    if (!firstName.trim()) errors["first_name"] = "El nombre es obligatorio";
-    if (!lastName.trim()) errors["last_name"] = "El apellido es obligatorio";
+    if (!email.trim()) errors['email'] = 'El correo es obligatorio';
+    if (!firstName.trim()) errors['first_name'] = 'El nombre es obligatorio';
+    if (!lastName.trim()) errors['last_name'] = 'El apellido es obligatorio';
 
     const dynamicValid = validateDynamicFields();
     if (Object.keys(errors).length > 0) {
@@ -112,8 +108,7 @@ export default function SubscriptionForm({
       });
       onSuccess(result);
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Error al procesar la suscripción";
+      const msg = err instanceof Error ? err.message : 'Error al procesar la suscripción';
       setApiError(msg);
     } finally {
       setIsSubmitting(false);
@@ -121,7 +116,7 @@ export default function SubscriptionForm({
   }
 
   const inputClass =
-    "rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed";
+    'rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed';
 
   return (
     <form
@@ -134,7 +129,10 @@ export default function SubscriptionForm({
         <>
           <div className="flex flex-col gap-1">
             <label htmlFor="sub-email" className="text-sm font-medium text-gray-700">
-              Correo electrónico <span className="text-red-500" aria-hidden="true">*</span>
+              Correo electrónico{' '}
+              <span className="text-red-500" aria-hidden="true">
+                *
+              </span>
             </label>
             <input
               id="sub-email"
@@ -144,14 +142,19 @@ export default function SubscriptionForm({
               disabled={isSubmitting}
               className={inputClass}
             />
-            {fieldErrors["email"] && (
-              <p className="text-xs text-red-600" role="alert">{fieldErrors["email"]}</p>
+            {fieldErrors['email'] && (
+              <p className="text-xs text-red-600" role="alert">
+                {fieldErrors['email']}
+              </p>
             )}
           </div>
 
           <div className="flex flex-col gap-1">
             <label htmlFor="sub-first-name" className="text-sm font-medium text-gray-700">
-              Nombre <span className="text-red-500" aria-hidden="true">*</span>
+              Nombre{' '}
+              <span className="text-red-500" aria-hidden="true">
+                *
+              </span>
             </label>
             <input
               id="sub-first-name"
@@ -161,14 +164,19 @@ export default function SubscriptionForm({
               disabled={isSubmitting}
               className={inputClass}
             />
-            {fieldErrors["first_name"] && (
-              <p className="text-xs text-red-600" role="alert">{fieldErrors["first_name"]}</p>
+            {fieldErrors['first_name'] && (
+              <p className="text-xs text-red-600" role="alert">
+                {fieldErrors['first_name']}
+              </p>
             )}
           </div>
 
           <div className="flex flex-col gap-1">
             <label htmlFor="sub-last-name" className="text-sm font-medium text-gray-700">
-              Apellido <span className="text-red-500" aria-hidden="true">*</span>
+              Apellido{' '}
+              <span className="text-red-500" aria-hidden="true">
+                *
+              </span>
             </label>
             <input
               id="sub-last-name"
@@ -178,8 +186,10 @@ export default function SubscriptionForm({
               disabled={isSubmitting}
               className={inputClass}
             />
-            {fieldErrors["last_name"] && (
-              <p className="text-xs text-red-600" role="alert">{fieldErrors["last_name"]}</p>
+            {fieldErrors['last_name'] && (
+              <p className="text-xs text-red-600" role="alert">
+                {fieldErrors['last_name']}
+              </p>
             )}
           </div>
         </>
@@ -223,7 +233,7 @@ export default function SubscriptionForm({
         disabled={isSubmitting}
         className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isSubmitting ? "Enviando…" : "Suscribirse"}
+        {isSubmitting ? 'Enviando…' : 'Suscribirse'}
       </button>
     </form>
   );

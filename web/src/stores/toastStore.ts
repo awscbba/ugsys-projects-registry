@@ -1,18 +1,14 @@
-import { atom } from "nanostores";
+import { atom } from 'nanostores';
 
 export interface Toast {
   id: string;
-  type: "success" | "error" | "warning" | "info";
+  type: 'success' | 'error' | 'warning' | 'info';
   message: string;
 }
 
 export const $toasts = atom<Toast[]>([]);
 
-export function addToast(
-  type: Toast["type"],
-  message: string,
-  durationMs = 5000,
-): void {
+export function addToast(type: Toast['type'], message: string, durationMs = 5000): void {
   const id = crypto.randomUUID();
   $toasts.set([...$toasts.get(), { id, type, message }]);
   setTimeout(() => removeToast(id), durationMs);

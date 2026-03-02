@@ -1,14 +1,11 @@
-import type { PaginatedResponse } from "../types/api";
-import type { Project } from "../types/project";
-import { httpClient } from "./httpClient";
+import type { PaginatedResponse } from '../types/api';
+import type { Project } from '../types/project';
+import { httpClient } from './httpClient';
 
 export const projectApi = {
-  getPublicProjects(
-    page = 1,
-    pageSize = 12,
-  ): Promise<PaginatedResponse<Project>> {
+  getPublicProjects(page = 1, pageSize = 12): Promise<PaginatedResponse<Project>> {
     return httpClient.get<PaginatedResponse<Project>>(
-      `/api/v1/projects/public?page=${page}&page_size=${pageSize}`,
+      `/api/v1/projects/public?page=${page}&page_size=${pageSize}`
     );
   },
 

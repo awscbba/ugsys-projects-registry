@@ -1,4 +1,4 @@
-import type { FormSchema } from "@/types/form";
+import type { FormSchema } from '@/types/form';
 
 interface DynamicFormRendererProps {
   schema: FormSchema;
@@ -27,58 +27,63 @@ export default function DynamicFormRenderer({
             <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
               {field.question}
               {field.required && (
-                <span className="ml-1 text-red-500" aria-hidden="true">*</span>
+                <span className="ml-1 text-red-500" aria-hidden="true">
+                  *
+                </span>
               )}
             </label>
 
-            {field.field_type === "text" && (
+            {field.field_type === 'text' && (
               <input
                 id={inputId}
                 type="text"
-                value={typeof value === "string" ? value : ""}
+                value={typeof value === 'string' ? value : ''}
                 onChange={(e) => onChange(field.id, e.target.value)}
                 disabled={disabled}
                 className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             )}
 
-            {field.field_type === "textarea" && (
+            {field.field_type === 'textarea' && (
               <textarea
                 id={inputId}
                 rows={4}
-                value={typeof value === "string" ? value : ""}
+                value={typeof value === 'string' ? value : ''}
                 onChange={(e) => onChange(field.id, e.target.value)}
                 disabled={disabled}
                 className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed resize-y"
               />
             )}
 
-            {field.field_type === "date" && (
+            {field.field_type === 'date' && (
               <input
                 id={inputId}
                 type="date"
-                value={typeof value === "string" ? value : ""}
+                value={typeof value === 'string' ? value : ''}
                 onChange={(e) => onChange(field.id, e.target.value)}
                 disabled={disabled}
                 className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             )}
 
-            {field.field_type === "number" && (
+            {field.field_type === 'number' && (
               <input
                 id={inputId}
                 type="number"
-                value={typeof value === "string" ? value : ""}
+                value={typeof value === 'string' ? value : ''}
                 onChange={(e) => onChange(field.id, e.target.value)}
                 disabled={disabled}
                 className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
             )}
 
-            {field.field_type === "poll_single" && (
+            {field.field_type === 'poll_single' && (
               <div className="flex flex-col gap-2" role="radiogroup" aria-labelledby={inputId}>
                 {(field.options ?? []).map((option) => (
-                  <label key={option} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <label
+                    key={option}
+                    className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
+                  >
                     <input
                       type="radio"
                       name={inputId}
@@ -94,13 +99,16 @@ export default function DynamicFormRenderer({
               </div>
             )}
 
-            {field.field_type === "poll_multiple" && (
+            {field.field_type === 'poll_multiple' && (
               <div className="flex flex-col gap-2">
                 {(field.options ?? []).map((option) => {
                   const selected = Array.isArray(value) ? value : [];
                   const checked = selected.includes(option);
                   return (
-                    <label key={option} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <label
+                      key={option}
+                      className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
+                    >
                       <input
                         type="checkbox"
                         value={option}
@@ -122,7 +130,9 @@ export default function DynamicFormRenderer({
             )}
 
             {error && (
-              <p className="text-xs text-red-600" role="alert">{error}</p>
+              <p className="text-xs text-red-600" role="alert">
+                {error}
+              </p>
             )}
           </div>
         );

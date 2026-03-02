@@ -8,14 +8,9 @@
  * - 15-second timeout via AbortController
  */
 
-import {
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
-  clearTokens,
-} from "../stores/authStore";
+import { getAccessToken, getRefreshToken, setTokens, clearTokens } from '../stores/authStore';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 const TIMEOUT_MS = 15_000;
 
 type RefreshFn = (token: string) => Promise<{ access_token: string; refresh_token: string }>;
@@ -29,16 +24,16 @@ export function setRefreshTokenFn(fn: RefreshFn): void {
 
 function forceLogout(): void {
   clearTokens();
-  window.location.href = "/login";
+  window.location.href = '/login';
 }
 
 function buildHeaders(token: string | null): Record<string, string> {
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    "X-Request-ID": crypto.randomUUID(),
+    'Content-Type': 'application/json',
+    'X-Request-ID': crypto.randomUUID(),
   };
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    headers['Authorization'] = `Bearer ${token}`;
   }
   return headers;
 }
@@ -54,7 +49,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
   }
 
   // Unwrap envelope: { data: T, meta: { ... } }
-  if (json && typeof json === "object" && "data" in json) {
+  if (json && typeof json === 'object' && 'data' in json) {
     return (json as { data: T }).data;
   }
 
@@ -102,11 +97,11 @@ async function request<T>(
         return request<T>(method, path, body, true);
       } catch {
         forceLogout();
-        throw new Error("Session expired. Please log in again.");
+        throw new Error('Session expired. Please log in again.');
       }
     } else {
       forceLogout();
-      throw new Error("Session expired. Please log in again.");
+      throw new Error('Session expired. Please log in again.');
     }
   }
 
@@ -115,22 +110,22 @@ async function request<T>(
 
 export const httpClient = {
   get<T>(path: string): Promise<T> {
-    return request<T>("GET", path);
+    return request<T>('GET', path);
   },
 
   post<T>(path: string, body?: unknown): Promise<T> {
-    return request<T>("POST", path, body);
+    return request<T>('POST', path, body);
   },
 
   put<T>(path: string, body?: unknown): Promise<T> {
-    return request<T>("PUT", path, body);
+    return request<T>('PUT', path, body);
   },
 
   patch<T>(path: string, body?: unknown): Promise<T> {
-    return request<T>("PATCH", path, body);
+    return request<T>('PATCH', path, body);
   },
 
   delete<T>(path: string): Promise<T> {
-    return request<T>("DELETE", path);
+    return request<T>('DELETE', path);
   },
 };

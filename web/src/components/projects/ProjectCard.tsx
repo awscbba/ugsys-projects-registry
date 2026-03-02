@@ -1,19 +1,19 @@
-import { useNavigate } from "react-router-dom";
-import type { Project, ProjectStatus } from "@/types/project";
-import { formatDate } from "@/utils/dateUtils";
+import { useNavigate } from 'react-router-dom';
+import type { Project, ProjectStatus } from '@/types/project';
+import { formatDate } from '@/utils/dateUtils';
 
 const STATUS_STYLES: Record<ProjectStatus, string> = {
-  pending: "bg-gray-100 text-gray-700",
-  active: "bg-green-100 text-green-700",
-  completed: "bg-blue-100 text-blue-700",
-  cancelled: "bg-red-100 text-red-700",
+  pending: 'bg-gray-100 text-gray-700',
+  active: 'bg-green-100 text-green-700',
+  completed: 'bg-blue-100 text-blue-700',
+  cancelled: 'bg-red-100 text-red-700',
 };
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
-  pending: "Pendiente",
-  active: "Activo",
-  completed: "Completado",
-  cancelled: "Cancelado",
+  pending: 'Pendiente',
+  active: 'Activo',
+  completed: 'Completado',
+  cancelled: 'Cancelado',
 };
 
 interface ProjectCardProps {
@@ -33,11 +33,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     <article className="rounded-lg shadow overflow-hidden bg-white flex flex-col">
       {/* Thumbnail */}
       {thumbnail ? (
-        <img
-          src={thumbnail}
-          alt={project.name}
-          className="w-full h-40 object-cover"
-        />
+        <img src={thumbnail} alt={project.name} className="w-full h-40 object-cover" />
       ) : (
         <div className="w-full h-40 bg-gray-200" aria-hidden="true" />
       )}
@@ -49,14 +45,10 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         </span>
 
         {/* Name */}
-        <h2 className="text-base font-semibold text-gray-900 line-clamp-2">
-          {project.name}
-        </h2>
+        <h2 className="text-base font-semibold text-gray-900 line-clamp-2">{project.name}</h2>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 line-clamp-3 flex-1">
-          {project.description}
-        </p>
+        <p className="text-sm text-gray-600 line-clamp-3 flex-1">{project.description}</p>
 
         {/* Participants */}
         <p className="text-xs text-gray-500">{participantLabel}</p>
@@ -64,7 +56,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         {/* Date range */}
         <p className="text-xs text-gray-500">
           {formatDate(project.start_date)}
-          {project.end_date ? ` – ${formatDate(project.end_date)}` : ""}
+          {project.end_date ? ` – ${formatDate(project.end_date)}` : ''}
         </p>
 
         {/* Status badge */}

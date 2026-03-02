@@ -1,25 +1,25 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import type { Subscription, SubscriptionStatus } from "@/types/project";
-import { subscriptionApi } from "@/services/subscriptionApi";
-import { formatDate } from "@/utils/dateUtils";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { Subscription, SubscriptionStatus } from '@/types/project';
+import { subscriptionApi } from '@/services/subscriptionApi';
+import { formatDate } from '@/utils/dateUtils';
 
 interface Props {
   personId: string;
 }
 
 const STATUS_STYLES: Record<SubscriptionStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  active: "bg-green-100 text-green-700",
-  rejected: "bg-red-100 text-red-700",
-  cancelled: "bg-gray-100 text-gray-700",
+  pending: 'bg-yellow-100 text-yellow-700',
+  active: 'bg-green-100 text-green-700',
+  rejected: 'bg-red-100 text-red-700',
+  cancelled: 'bg-gray-100 text-gray-700',
 };
 
 const STATUS_LABELS: Record<SubscriptionStatus, string> = {
-  pending: "Pendiente",
-  active: "Activo",
-  rejected: "Rechazado",
-  cancelled: "Cancelado",
+  pending: 'Pendiente',
+  active: 'Activo',
+  rejected: 'Rechazado',
+  cancelled: 'Cancelado',
 };
 
 export default function SubscriptionList({ personId }: Props) {
@@ -39,7 +39,7 @@ export default function SubscriptionList({ personId }: Props) {
         if (!cancelled) setSubscriptions(data);
       })
       .catch(() => {
-        if (!cancelled) setError("No se pudieron cargar tus suscripciones.");
+        if (!cancelled) setError('No se pudieron cargar tus suscripciones.');
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -67,11 +67,7 @@ export default function SubscriptionList({ personId }: Props) {
   }
 
   if (subscriptions.length === 0) {
-    return (
-      <p className="py-6 text-center text-sm text-gray-500">
-        No tienes suscripciones aún.
-      </p>
-    );
+    return <p className="py-6 text-center text-sm text-gray-500">No tienes suscripciones aún.</p>;
   }
 
   return (
@@ -85,10 +81,7 @@ export default function SubscriptionList({ personId }: Props) {
           >
             <div className="flex items-start justify-between gap-2">
               <span className="truncate text-sm font-medium text-gray-800">
-                Proyecto:{" "}
-                <span className="font-mono text-xs text-gray-500">
-                  {sub.project_id}
-                </span>
+                Proyecto: <span className="font-mono text-xs text-gray-500">{sub.project_id}</span>
               </span>
               <span
                 className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[sub.status]}`}
@@ -96,9 +89,7 @@ export default function SubscriptionList({ personId }: Props) {
                 {STATUS_LABELS[sub.status]}
               </span>
             </div>
-            <p className="mt-1 text-xs text-gray-400">
-              Suscrito el {formatDate(sub.created_at)}
-            </p>
+            <p className="mt-1 text-xs text-gray-400">Suscrito el {formatDate(sub.created_at)}</p>
           </button>
         </li>
       ))}
