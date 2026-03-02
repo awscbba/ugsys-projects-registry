@@ -366,23 +366,33 @@ class TestSecurityHeadersMiddlewarePreservation:
 
 
 def test_allowed_origins_json_array_parses_correctly(monkeypatch: pytest.MonkeyPatch) -> None:
-    """pydantic-settings v2 requires JSON array for list[str] fields.
+    """allowed_origins_list supports both comma-separated and JSON array formats.
 
-    Comma-separated string does NOT parse into multiple origins.
-    JSON array format is required.
+    Lambda env vars use comma-separated strings; both formats must work.
 
     Validates: Requirements 1.3, 2.3
     """
 
     import src.config as config_module
 
-    # JSON array format — correct (pydantic-settings v2 requires this for list[str])
+    # Comma-separated format — what Lambda env vars use
+    monkeypatch.setenv(
+        "ALLOWED_ORIGINS",
+        "https://registry.apps.cloud.org.bo,https://admin.cloud.org.bo",
+    )
+    s = config_module.Settings(_env_file=None)  # type: ignore[call-arg]
+    origins = s.allowed_origins_list
+    assert len(origins) == 2
+    assert "https://registry.apps.cloud.org.bo" in origins
+    assert "https://admin.cloud.org.bo" in origins
+
+    # JSON array format also works
     monkeypatch.setenv(
         "ALLOWED_ORIGINS",
         '["https://registry.apps.cloud.org.bo", "https://admin.cloud.org.bo"]',
     )
-    # Re-instantiate Settings to pick up the patched env var
-    s = config_module.Settings(_env_file=None)  # type: ignore[call-arg]
-    assert len(s.allowed_origins) == 2
-    assert "https://registry.apps.cloud.org.bo" in s.allowed_origins
-    assert "https://admin.cloud.org.bo" in s.allowed_origins
+    s2 = config_module.Settings(_env_file=None)  # type: ignore[call-arg]
+    origins2 = s2.allowed_origins_list
+    assert len(origins2) == 2
+    assert "https://registry.apps.cloud.org.bo" in origins2
+    assert "https://admin.cloud.org.bo" in origins2
