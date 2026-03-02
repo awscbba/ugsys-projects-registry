@@ -56,6 +56,20 @@ async function parseResponse<T>(response: Response): Promise<T> {
   return json as T;
 }
 
+/** Like parseResponse but returns the full JSON without unwrapping the envelope. */
+async function parseResponseRaw<T>(response: Response): Promise<T> {
+  const json = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message =
+      (json as { message?: string } | null)?.message ??
+      `Request failed with status ${response.status}`;
+    throw new Error(message);
+  }
+
+  return json as T;
+}
+
 async function fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -113,9 +127,57 @@ async function request<T>(
   return parseResponse<T>(response);
 }
 
+/** Like request() but skips envelope unwrapping — returns the full JSON body. */
+async function requestRaw<T>(
+  method: string,
+  path: string,
+  body?: unknown,
+  isRetry = false
+): Promise<T> {
+  const token = getAccessToken();
+  const url = `${BASE_URL}${path}`;
+
+  const options: RequestInit = {
+    method,
+    headers: buildHeaders(token),
+  };
+
+  if (body !== undefined) {
+    options.body = JSON.stringify(body);
+  }
+
+  const response = await fetchWithTimeout(url, options);
+
+  if (response.status === 401 && !isRetry) {
+    const refreshToken = getRefreshToken();
+    if (refreshToken && _refreshTokenFn) {
+      try {
+        const tokens = await _refreshTokenFn(refreshToken);
+        setTokens(tokens.access_token, tokens.refresh_token);
+        return requestRaw<T>(method, path, body, true);
+      } catch {
+        forceLogout();
+        throw new Error('Session expired. Please log in again.');
+      }
+    } else {
+      if (getAccessToken() !== null || getRefreshToken() !== null) {
+        forceLogout();
+      }
+      throw new Error('Session expired. Please log in again.');
+    }
+  }
+
+  return parseResponseRaw<T>(response);
+}
+
 export const httpClient = {
   get<T>(path: string): Promise<T> {
     return request<T>('GET', path);
+  },
+
+  /** Like get(), but returns the full { data, meta } envelope without unwrapping. */
+  getRaw<T>(path: string): Promise<T> {
+    return requestRaw<T>('GET', path);
   },
 
   post<T>(path: string, body?: unknown): Promise<T> {

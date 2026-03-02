@@ -24,6 +24,7 @@ from src.domain.exceptions import AuthorizationError
 from src.presentation.auth import CurrentUser, get_current_user
 from src.presentation.dependencies import get_form_service, get_project_service
 from src.presentation.envelope import envelope
+from src.presentation.middleware.correlation_id import correlation_id_var
 
 logger = structlog.get_logger()
 router = APIRouter(prefix="/projects", tags=["Projects"])
@@ -100,10 +101,25 @@ async def create_project(
 
 @router.get("/public")
 async def list_public_projects(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(12, ge=1, le=100),
     service: ProjectService = Depends(get_project_service),
 ) -> dict[str, Any]:
     projects = await service.list_public()
-    return envelope([asdict(p) for p in projects])
+    total = len(projects)
+    total_pages = max(1, (total + page_size - 1) // page_size)
+    start = (page - 1) * page_size
+    page_items = projects[start : start + page_size]
+    return {
+        "data": [asdict(p) for p in page_items],
+        "meta": {
+            "request_id": correlation_id_var.get(""),
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+            "total_pages": total_pages,
+        },
+    }
 
 
 @router.get("/")
