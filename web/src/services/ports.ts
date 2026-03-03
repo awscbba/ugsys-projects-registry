@@ -24,3 +24,4 @@ export interface ISubscriptionApi {
   }): Promise<{ subscription_id: string }>;
   publicRegister(data: { email: string; full_name: string; password: string }): Promise<void>;
 }
+
