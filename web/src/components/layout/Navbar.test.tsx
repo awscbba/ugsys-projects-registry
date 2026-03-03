@@ -78,7 +78,10 @@ describe('Navbar — navigation links', () => {
 describe('Navbar — active link highlight', () => {
   it('"Proyectos" gets orange highlight class when at /', () => {
     const router = createMemoryRouter(
-      [{ path: '/', element: <Navbar /> }, { path: '*', element: <Navbar /> }],
+      [
+        { path: '/', element: <Navbar /> },
+        { path: '*', element: <Navbar /> },
+      ],
       { initialEntries: ['/'] }
     );
     render(<RouterProvider router={router} />);
@@ -88,7 +91,10 @@ describe('Navbar — active link highlight', () => {
 
   it('"Proyectos" does not get orange highlight class when at /other', () => {
     const router = createMemoryRouter(
-      [{ path: '/', element: <Navbar /> }, { path: '/other', element: <Navbar /> }],
+      [
+        { path: '/', element: <Navbar /> },
+        { path: '/other', element: <Navbar /> },
+      ],
       { initialEntries: ['/other'] }
     );
     render(<RouterProvider router={router} />);

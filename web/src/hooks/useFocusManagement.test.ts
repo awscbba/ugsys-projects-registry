@@ -45,16 +45,19 @@ describe('useFocusManagement', () => {
 
   describe('Focus Storage', () => {
     it('stores previously focused element on open', async () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
 
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       expect(document.activeElement).toBe(mockModal);
     });
@@ -64,15 +67,18 @@ describe('useFocusManagement', () => {
       document.body.appendChild(second);
       second.focus();
 
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       rerender({ isOpen: false });
 
@@ -85,15 +91,18 @@ describe('useFocusManagement', () => {
 
   describe('Focus Restoration', () => {
     it('restores focus on close (P7)', async () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       rerender({ isOpen: false });
 
@@ -101,15 +110,18 @@ describe('useFocusManagement', () => {
     });
 
     it('handles element removed from DOM', async () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       document.body.removeChild(mockButton);
 
@@ -121,15 +133,18 @@ describe('useFocusManagement', () => {
     });
 
     it('clears ref after restoration', async () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
       rerender({ isOpen: false });
 
       const newBtn = document.createElement('button');
@@ -137,7 +152,9 @@ describe('useFocusManagement', () => {
       newBtn.focus();
 
       rerender({ isOpen: true });
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
       rerender({ isOpen: false });
 
       expect(document.activeElement).toBe(newBtn);
@@ -149,42 +166,47 @@ describe('useFocusManagement', () => {
 
   describe('Modal Focus', () => {
     it('moves focus to modal after delay', async () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       expect(document.activeElement).toBe(mockModal);
     });
 
     it('handles missing ref without throwing', () => {
-      const { rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
       expect(() => rerender({ isOpen: true })).not.toThrow();
     });
 
     it('delays focus to allow render', async () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
       rerender({ isOpen: true });
 
       // Immediately after open — focus not yet moved
       expect(document.activeElement).toBe(mockButton);
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       expect(document.activeElement).toBe(mockModal);
     });
@@ -194,16 +216,19 @@ describe('useFocusManagement', () => {
 
   describe('Multiple Open/Close Cycles', () => {
     it('handles multiple cycles correctly', async () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       for (let i = 0; i < 2; i++) {
         rerender({ isOpen: true });
-        await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+        await act(async () => {
+          await new Promise((r) => setTimeout(r, 150));
+        });
         expect(document.activeElement).toBe(mockModal);
 
         rerender({ isOpen: false });
@@ -212,18 +237,21 @@ describe('useFocusManagement', () => {
     });
 
     it('handles rapid open/close', async () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
       rerender({ isOpen: false });
       rerender({ isOpen: true });
 
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       expect(document.activeElement).toBe(mockModal);
     });
@@ -233,15 +261,18 @@ describe('useFocusManagement', () => {
 
   describe('Accessibility Compliance', () => {
     it('WCAG 2.1 — focus moves to modal on open, returns to trigger on close', async () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
       expect(document.activeElement).toBe(mockModal);
 
       rerender({ isOpen: false });
@@ -254,15 +285,18 @@ describe('useFocusManagement', () => {
       document.body.appendChild(focusableDiv);
       focusableDiv.focus();
 
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       rerender({ isOpen: false });
 
@@ -291,34 +325,40 @@ describe('useFocusManagement', () => {
 
   describe('Memory Leak Prevention', () => {
     it('cleans up timeout on unmount (P9)', async () => {
-      const { result, rerender, unmount } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender, unmount } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
       unmount();
 
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       // No crash, no state update warning
       expect(true).toBe(true);
     });
 
     it('cleans up on rapid isOpen change', async () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
       rerender({ isOpen: false });
 
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       // Timeout was cancelled — modal should NOT have focus
       expect(document.activeElement).not.toBe(mockModal);
@@ -333,15 +373,18 @@ describe('useFocusManagement', () => {
       document.body.focus();
       const prev = document.activeElement;
 
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       rerender({ isOpen: true });
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       rerender({ isOpen: false });
 
@@ -350,12 +393,13 @@ describe('useFocusManagement', () => {
     });
 
     it('handles null activeElement without throwing', () => {
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = mockModal;
+      });
 
       expect(() => rerender({ isOpen: true })).not.toThrow();
     });
@@ -364,16 +408,19 @@ describe('useFocusManagement', () => {
       const span = document.createElement('span');
       document.body.appendChild(span);
 
-      const { result, rerender } = renderHook(
-        ({ isOpen }) => useFocusManagement(isOpen),
-        { initialProps: { isOpen: false } }
-      );
+      const { result, rerender } = renderHook(({ isOpen }) => useFocusManagement(isOpen), {
+        initialProps: { isOpen: false },
+      });
 
-      act(() => { (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = span; });
+      act(() => {
+        (result.current.modalRef as React.MutableRefObject<HTMLElement>).current = span;
+      });
 
       expect(() => rerender({ isOpen: true })).not.toThrow();
 
-      await act(async () => { await new Promise(r => setTimeout(r, 150)); });
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 150));
+      });
 
       document.body.removeChild(span);
     });

@@ -10,7 +10,9 @@ export function Navbar() {
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
         {/* Brand */}
         <div className="flex items-center gap-2 shrink-0">
-          <span aria-hidden="true" className="text-xl">🌍</span>
+          <span aria-hidden="true" className="text-xl">
+            🌍
+          </span>
           <div>
             <h1 className="text-sm font-bold leading-tight">AWS User Group Cochabamba</h1>
             <p className="text-xs text-[#FF9900] leading-tight">Registro de Proyectos</p>

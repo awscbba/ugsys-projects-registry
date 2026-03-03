@@ -221,23 +221,20 @@ describe('UserMenu — initials (P6)', () => {
   // PBT: for any email, initials are always 1 uppercase character
   it('PBT: for any email, initials are always 1 uppercase character', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        fc.emailAddress(),
-        async (email) => {
-          act(() => $user.set(makeUser({ email })));
-          const { unmount } = renderMenu();
+      fc.asyncProperty(fc.emailAddress(), async (email) => {
+        act(() => $user.set(makeUser({ email })));
+        const { unmount } = renderMenu();
 
-          const btn = screen.getByRole('button', { name: /menú de usuario/i });
-          const span = btn.querySelector('span');
-          const text = span?.textContent ?? '';
+        const btn = screen.getByRole('button', { name: /menú de usuario/i });
+        const span = btn.querySelector('span');
+        const text = span?.textContent ?? '';
 
-          expect(text).toHaveLength(1);
-          expect(text).toBe(text.toUpperCase());
+        expect(text).toHaveLength(1);
+        expect(text).toBe(text.toUpperCase());
 
-          unmount();
-          act(() => $user.set(null));
-        }
-      ),
+        unmount();
+        act(() => $user.set(null));
+      }),
       { numRuns: 50 }
     );
   });
