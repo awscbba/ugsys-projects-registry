@@ -7,7 +7,8 @@
     "jq@latest",
     "yq@latest",
     "just@latest",
-    "nodejs@latest"
+    "nodejs@latest",
+    "pnpm@latest"
   ],
   "shell": {
     "init_hook": [
