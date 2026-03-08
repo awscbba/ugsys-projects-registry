@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches: [main]
-    paths-ignore: ["*.md", ".gitignore", "web/**"]
+    paths-ignore: ["*.md", ".gitignore", "web/**", ".kiro/**"]
 
 env:
   AWS_REGION: us-east-1
