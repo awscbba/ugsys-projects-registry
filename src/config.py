@@ -90,7 +90,7 @@ class Settings(BaseSettings):
         return ""
 
     # ── Public URL ──────────────────────────────────────────────────────────
-    public_base_url: str = "https://api.cbba.cloud.org.bo/projects"
+    public_base_url: str = "https://api.apps.cloud.org.bo/projects"
 
     # ── CORS ────────────────────────────────────────────────────────────────
     # All browser-facing origins that may call this API.
