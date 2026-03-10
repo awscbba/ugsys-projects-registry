@@ -131,7 +131,10 @@ export default function SubscriptionForm({
         <>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="sub-email" className={labelClass}>
-              Correo electrónico <span className="text-red-400" aria-hidden="true">*</span>
+              Correo electrónico{' '}
+              <span className="text-red-400" aria-hidden="true">
+                *
+              </span>
             </label>
             <input
               id="sub-email"
@@ -141,12 +144,19 @@ export default function SubscriptionForm({
               disabled={isSubmitting}
               className={inputClass}
             />
-            {fieldErrors['email'] && <p className={errorClass} role="alert">{fieldErrors['email']}</p>}
+            {fieldErrors['email'] && (
+              <p className={errorClass} role="alert">
+                {fieldErrors['email']}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="sub-first-name" className={labelClass}>
-              Nombre <span className="text-red-400" aria-hidden="true">*</span>
+              Nombre{' '}
+              <span className="text-red-400" aria-hidden="true">
+                *
+              </span>
             </label>
             <input
               id="sub-first-name"
@@ -156,12 +166,19 @@ export default function SubscriptionForm({
               disabled={isSubmitting}
               className={inputClass}
             />
-            {fieldErrors['first_name'] && <p className={errorClass} role="alert">{fieldErrors['first_name']}</p>}
+            {fieldErrors['first_name'] && (
+              <p className={errorClass} role="alert">
+                {fieldErrors['first_name']}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="sub-last-name" className={labelClass}>
-              Apellido <span className="text-red-400" aria-hidden="true">*</span>
+              Apellido{' '}
+              <span className="text-red-400" aria-hidden="true">
+                *
+              </span>
             </label>
             <input
               id="sub-last-name"
@@ -171,7 +188,11 @@ export default function SubscriptionForm({
               disabled={isSubmitting}
               className={inputClass}
             />
-            {fieldErrors['last_name'] && <p className={errorClass} role="alert">{fieldErrors['last_name']}</p>}
+            {fieldErrors['last_name'] && (
+              <p className={errorClass} role="alert">
+                {fieldErrors['last_name']}
+              </p>
+            )}
           </div>
         </>
       )}
@@ -203,7 +224,10 @@ export default function SubscriptionForm({
       )}
 
       {apiError && (
-        <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2" role="alert">
+        <p
+          className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2"
+          role="alert"
+        >
           {apiError}
         </p>
       )}

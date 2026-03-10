@@ -60,16 +60,17 @@ export function ResetPasswordPage() {
             shadow-[0_8px_48px_rgba(0,0,0,0.5)]
           "
         >
-          <h1 className="mb-1 text-center text-xl font-semibold text-white/90">
-            Nueva contraseña
-          </h1>
+          <h1 className="mb-1 text-center text-xl font-semibold text-white/90">Nueva contraseña</h1>
           <p className="mb-7 text-center text-sm text-white/40">
             Elige una contraseña segura para tu cuenta
           </p>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
             <div>
-              <label htmlFor="new-password" className="mb-1.5 block text-sm font-medium text-white/60">
+              <label
+                htmlFor="new-password"
+                className="mb-1.5 block text-sm font-medium text-white/60"
+              >
                 Nueva contraseña
               </label>
               <input
@@ -84,7 +85,10 @@ export function ResetPasswordPage() {
             </div>
 
             <div>
-              <label htmlFor="confirm-password" className="mb-1.5 block text-sm font-medium text-white/60">
+              <label
+                htmlFor="confirm-password"
+                className="mb-1.5 block text-sm font-medium text-white/60"
+              >
                 Confirmar contraseña
               </label>
               <input

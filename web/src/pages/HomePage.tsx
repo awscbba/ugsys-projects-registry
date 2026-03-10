@@ -30,7 +30,9 @@ export default function HomePage() {
         <div>
           <h1 className="text-3xl font-bold text-white/90 tracking-tight">Proyectos</h1>
           {total > 0 && (
-            <p className="mt-1 text-sm text-white/40">{total} proyecto{total !== 1 ? 's' : ''} disponibles</p>
+            <p className="mt-1 text-sm text-white/40">
+              {total} proyecto{total !== 1 ? 's' : ''} disponibles
+            </p>
           )}
         </div>
         <ViewToggle view={view} onChange={setView} />

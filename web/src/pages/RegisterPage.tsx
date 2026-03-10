@@ -34,9 +34,7 @@ export function RegisterPage() {
             </span>
           </div>
 
-          <h1 className="mb-1 text-center text-xl font-semibold text-white/90">
-            Crear cuenta
-          </h1>
+          <h1 className="mb-1 text-center text-xl font-semibold text-white/90">Crear cuenta</h1>
           <p className="mb-7 text-center text-sm text-white/40">
             Únete a la comunidad y participa en proyectos
           </p>

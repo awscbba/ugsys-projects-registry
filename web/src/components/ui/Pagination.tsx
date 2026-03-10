@@ -39,7 +39,13 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
         aria-label="Página anterior"
         className={navBtnClass}
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
         <span className="ml-1">Anterior</span>
@@ -47,7 +53,11 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
 
       {pages.map((p, idx) =>
         p === '...' ? (
-          <span key={`ellipsis-${idx}`} className="px-2 py-2 text-sm text-white/25" aria-hidden="true">
+          <span
+            key={`ellipsis-${idx}`}
+            className="px-2 py-2 text-sm text-white/25"
+            aria-hidden="true"
+          >
             …
           </span>
         ) : (
@@ -78,7 +88,13 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
         className={navBtnClass}
       >
         <span className="mr-1">Siguiente</span>
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>

@@ -32,7 +32,9 @@ export default function DynamicFormRenderer({
             <label htmlFor={inputId} className="text-sm font-medium text-white/60">
               {field.question}
               {field.required && (
-                <span className="ml-1 text-red-400" aria-hidden="true">*</span>
+                <span className="ml-1 text-red-400" aria-hidden="true">
+                  *
+                </span>
               )}
             </label>
 
@@ -133,7 +135,9 @@ export default function DynamicFormRenderer({
             )}
 
             {error && (
-              <p className="text-xs text-red-400" role="alert">{error}</p>
+              <p className="text-xs text-red-400" role="alert">
+                {error}
+              </p>
             )}
           </div>
         );

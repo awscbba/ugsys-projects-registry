@@ -67,7 +67,10 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
         ) : (
           <form onSubmit={handleSubmit} noValidate>
             <div className="mb-4">
-              <label htmlFor="forgot-email" className="mb-1.5 block text-sm font-medium text-white/60">
+              <label
+                htmlFor="forgot-email"
+                className="mb-1.5 block text-sm font-medium text-white/60"
+              >
                 Correo electrónico
               </label>
               <input

@@ -35,11 +35,19 @@ export default function SubscriptionList({ personId }: Props) {
 
     subscriptionApi
       .getMySubscriptions(personId)
-      .then((data) => { if (!cancelled) setSubscriptions(data); })
-      .catch(() => { if (!cancelled) setError('No se pudieron cargar tus suscripciones.'); })
-      .finally(() => { if (!cancelled) setIsLoading(false); });
+      .then((data) => {
+        if (!cancelled) setSubscriptions(data);
+      })
+      .catch(() => {
+        if (!cancelled) setError('No se pudieron cargar tus suscripciones.');
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [personId]);
 
   if (isLoading) {
@@ -52,7 +60,10 @@ export default function SubscriptionList({ personId }: Props) {
 
   if (error) {
     return (
-      <p className="rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400" role="alert">
+      <p
+        className="rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400"
+        role="alert"
+      >
         {error}
       </p>
     );
@@ -78,10 +89,11 @@ export default function SubscriptionList({ personId }: Props) {
           >
             <div className="flex items-start justify-between gap-2">
               <span className="truncate text-sm font-medium text-white/75">
-                Proyecto:{' '}
-                <span className="font-mono text-xs text-white/40">{sub.project_id}</span>
+                Proyecto: <span className="font-mono text-xs text-white/40">{sub.project_id}</span>
               </span>
-              <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[sub.status]}`}>
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[sub.status]}`}
+              >
                 {STATUS_LABELS[sub.status]}
               </span>
             </div>

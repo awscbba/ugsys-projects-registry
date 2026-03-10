@@ -67,9 +67,10 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
               flex items-center gap-1.5 px-3 py-2 text-sm font-medium
               transition-all duration-150
               focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FF9900]
-              ${active
-                ? 'bg-[#FF9900] text-[#161d2b] shadow-[0_0_12px_rgba(255,153,0,0.3)]'
-                : 'text-white/50 hover:text-white/80 hover:bg-white/[0.05]'
+              ${
+                active
+                  ? 'bg-[#FF9900] text-[#161d2b] shadow-[0_0_12px_rgba(255,153,0,0.3)]'
+                  : 'text-white/50 hover:text-white/80 hover:bg-white/[0.05]'
               }
             `}
           >

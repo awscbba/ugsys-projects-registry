@@ -94,12 +94,20 @@ export default function SubscribePage() {
               stroke="currentColor"
               aria-hidden="true"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
           <h1 className="text-xl font-semibold text-white/90">¡Te has suscrito exitosamente!</h1>
           <p className="text-sm text-white/50">Tu solicitud está pendiente de aprobación.</p>
-          <Link to="/" className="mt-2 text-sm font-medium text-[#FF9900] hover:text-[#ffb84d] transition-colors">
+          <Link
+            to="/"
+            className="mt-2 text-sm font-medium text-[#FF9900] hover:text-[#ffb84d] transition-colors"
+          >
             ← Volver a proyectos
           </Link>
         </div>
@@ -111,7 +119,9 @@ export default function SubscribePage() {
   if (!isAuthenticated && publicSubscribe.emailExistsFor) {
     return (
       <main className="max-w-2xl mx-auto px-4 py-12">
-        <Link to="/" className={backLink}>← Volver a proyectos</Link>
+        <Link to="/" className={backLink}>
+          ← Volver a proyectos
+        </Link>
         <div
           className="
             rounded-2xl p-6 flex flex-col gap-4
@@ -140,7 +150,9 @@ export default function SubscribePage() {
   // Main page
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
-      <Link to="/" className={backLink}>← Volver a proyectos</Link>
+      <Link to="/" className={backLink}>
+        ← Volver a proyectos
+      </Link>
 
       {/* Project info */}
       <section
@@ -153,7 +165,9 @@ export default function SubscribePage() {
       >
         <div className="flex items-start justify-between gap-4 mb-3">
           <h1 className="text-2xl font-bold text-white/90 leading-tight">{project.name}</h1>
-          <span className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_STYLES[project.status]}`}>
+          <span
+            className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_STYLES[project.status]}`}
+          >
             {STATUS_LABELS[project.status]}
           </span>
         </div>

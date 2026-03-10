@@ -50,7 +50,10 @@ export default function PasswordChange() {
       <h2 className="mb-4 text-base font-semibold text-white/80">Cambiar contraseña</h2>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label htmlFor="current-password" className="mb-1.5 block text-xs font-medium text-white/50">
+          <label
+            htmlFor="current-password"
+            className="mb-1.5 block text-xs font-medium text-white/50"
+          >
             Contraseña actual
           </label>
           <input
@@ -76,7 +79,10 @@ export default function PasswordChange() {
           />
         </div>
         <div>
-          <label htmlFor="confirm-password" className="mb-1.5 block text-xs font-medium text-white/50">
+          <label
+            htmlFor="confirm-password"
+            className="mb-1.5 block text-xs font-medium text-white/50"
+          >
             Confirmar nueva contraseña
           </label>
           <input
@@ -90,7 +96,10 @@ export default function PasswordChange() {
         </div>
 
         {error && (
-          <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2" role="alert">
+          <p
+            className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2"
+            role="alert"
+          >
             {error}
           </p>
         )}

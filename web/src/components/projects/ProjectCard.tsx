@@ -50,10 +50,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div
-            className="w-full h-full flex items-center justify-center"
-            aria-hidden="true"
-          >
+          <div className="w-full h-full flex items-center justify-center" aria-hidden="true">
             {/* Gradient placeholder */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#FF9900]/10 via-[#252f42] to-[#161d2b]" />
             <svg
@@ -82,7 +79,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-[#FF9900]/15 text-[#FF9900] ring-1 ring-[#FF9900]/25">
             {project.category}
           </span>
-          <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${STATUS_STYLES[project.status]}`}>
+          <span
+            className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${STATUS_STYLES[project.status]}`}
+          >
             {STATUS_LABELS[project.status]}
           </span>
         </div>

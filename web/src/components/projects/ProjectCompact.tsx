@@ -52,17 +52,16 @@ export default function ProjectCompact({ projects }: ProjectCompactProps) {
                 : `${project.current_participants}`;
 
             return (
-              <tr
-                key={project.id}
-                className="transition-colors duration-150 hover:bg-[#252f42]"
-              >
+              <tr key={project.id} className="transition-colors duration-150 hover:bg-[#252f42]">
                 <td className="px-4 py-3 font-medium text-white/85 max-w-xs truncate">
                   {project.name}
                 </td>
                 <td className="px-4 py-3 text-white/50">{project.category}</td>
                 <td className="px-4 py-3 text-white/50">{participantLabel}</td>
                 <td className="px-4 py-3">
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[project.status]}`}>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[project.status]}`}
+                  >
                     {STATUS_LABELS[project.status]}
                   </span>
                 </td>

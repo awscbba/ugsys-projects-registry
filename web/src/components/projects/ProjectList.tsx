@@ -49,11 +49,15 @@ export default function ProjectList({ projects }: ProjectListProps) {
                 <span className="text-xs px-2 py-0.5 rounded-full bg-[#FF9900]/15 text-[#FF9900] ring-1 ring-[#FF9900]/25">
                   {project.category}
                 </span>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_STYLES[project.status]}`}>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full ${STATUS_STYLES[project.status]}`}
+                >
                   {STATUS_LABELS[project.status]}
                 </span>
               </div>
-              <p className="text-sm text-white/50 line-clamp-2 leading-relaxed">{project.description}</p>
+              <p className="text-sm text-white/50 line-clamp-2 leading-relaxed">
+                {project.description}
+              </p>
               <p className="mt-1.5 text-xs text-white/30">
                 {participantLabel} participantes · {formatDate(project.start_date)}
                 {project.end_date ? ` – ${formatDate(project.end_date)}` : ''}

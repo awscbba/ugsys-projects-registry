@@ -4,7 +4,15 @@ import { Footer, UserMenu } from '@ugsys/ui-lib';
 import type { RenderLink, LinkItem } from '@ugsys/ui-lib';
 import { useAuth } from '../../hooks/useAuth';
 
-const renderLink: RenderLink = ({ href, children, className, onClick, role, tabIndex, 'aria-current': ariaCurrent }) => (
+const renderLink: RenderLink = ({
+  href,
+  children,
+  className,
+  onClick,
+  role,
+  tabIndex,
+  'aria-current': ariaCurrent,
+}) => (
   <NavLink
     to={href}
     className={className}
@@ -58,15 +66,12 @@ function AppNavbar({ links, userMenuSlot }: AppNavbarProps) {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-
           {/* Brand */}
           <div className="flex-shrink-0">
             <span className="text-white font-bold text-base leading-tight">
               AWS User Group Cochabamba
             </span>
-            <span className="block text-[#FF9900] text-xs font-medium">
-              Registro de Proyectos
-            </span>
+            <span className="block text-[#FF9900] text-xs font-medium">Registro de Proyectos</span>
           </div>
 
           {/* Desktop nav links — always visible on md+ */}
@@ -115,12 +120,31 @@ function AppNavbar({ links, userMenuSlot }: AppNavbarProps) {
               className="md:hidden p-2 rounded text-white/60 hover:text-white hover:bg-white/[0.06] transition-colors"
             >
               {mobileOpen ? (
-                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                <svg
+                  aria-hidden="true"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               ) : (
-                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+                <svg
+                  aria-hidden="true"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="3" y1="18" x2="21" y2="18" />
                 </svg>
               )}
             </button>
@@ -177,8 +201,18 @@ export default function Layout() {
 
   const navLinks = [
     { label: 'Proyectos', href: '/', active: location.pathname === '/' },
-    { label: 'Sitio Principal', href: 'https://cbba.cloud.org.bo/aws', active: false, external: true },
-    { label: 'Eventos', href: 'https://cbba.cloud.org.bo/aws/events', active: false, external: true },
+    {
+      label: 'Sitio Principal',
+      href: 'https://cbba.cloud.org.bo/aws',
+      active: false,
+      external: true,
+    },
+    {
+      label: 'Eventos',
+      href: 'https://cbba.cloud.org.bo/aws/events',
+      active: false,
+      external: true,
+    },
   ];
 
   const footerLinks: LinkItem[] = [
@@ -187,17 +221,18 @@ export default function Layout() {
     { label: 'Contacto', href: 'https://cbba.cloud.org.bo/aws/contact', external: true },
   ];
 
-  const userMenuSlot = isAuthenticated && user ? (
-    <UserMenu
-      user={{ name: user.email, email: user.email, roles: user.roles, avatarUrl: undefined }}
-      onLogout={logout}
-      adminPanelUrl="https://admin.apps.cloud.org.bo"
-      profileHref="/dashboard"
-      renderLink={renderLink}
-    />
-  ) : (
-    <AuthButtons />
-  );
+  const userMenuSlot =
+    isAuthenticated && user ? (
+      <UserMenu
+        user={{ name: user.email, email: user.email, roles: user.roles, avatarUrl: undefined }}
+        onLogout={logout}
+        adminPanelUrl="https://admin.apps.cloud.org.bo"
+        profileHref="/dashboard"
+        renderLink={renderLink}
+      />
+    ) : (
+      <AuthButtons />
+    );
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -205,11 +240,7 @@ export default function Layout() {
       <main className="flex-1">
         <Outlet />
       </main>
-      <Footer
-        year={new Date().getFullYear()}
-        links={footerLinks}
-        renderLink={renderLink}
-      />
+      <Footer year={new Date().getFullYear()} links={footerLinks} renderLink={renderLink} />
     </div>
   );
 }
