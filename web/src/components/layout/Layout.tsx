@@ -1,24 +1,37 @@
 import { useState } from 'react';
 import { Outlet, NavLink, Link, useLocation } from 'react-router-dom';
 import { Footer, UserMenu } from '@ugsys/ui-lib';
-import type { RenderLink, LinkItem } from '@ugsys/ui-lib';
+import type { LinkItem } from '@ugsys/ui-lib';
 import { useAuth } from '../../hooks/useAuth';
 
-const renderLink: RenderLink = (props: Parameters<RenderLink>[0]) => {
-  const { href, children, className, onClick, role, tabIndex, 'aria-current': ariaCurrent } = props;
-  return (
-    <NavLink
-      to={href}
-      className={className}
-      onClick={onClick}
-      role={role}
-      tabIndex={tabIndex}
-      aria-current={ariaCurrent}
-    >
-      {children}
-    </NavLink>
-  );
-};
+const renderLink = ({
+  href,
+  children,
+  className,
+  onClick,
+  role,
+  tabIndex,
+  'aria-current': ariaCurrent,
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+  onClick?: React.MouseEventHandler;
+  role?: string;
+  tabIndex?: number;
+  'aria-current'?: React.AriaAttributes['aria-current'];
+}) => (
+  <NavLink
+    to={href}
+    className={className}
+    onClick={onClick}
+    role={role}
+    tabIndex={tabIndex}
+    aria-current={ariaCurrent}
+  >
+    {children}
+  </NavLink>
+);
 
 const focusClass =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#4A90E2] focus-visible:outline-offset-2';
