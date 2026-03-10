@@ -38,16 +38,32 @@ function buildHeaders(token: string | null): Record<string, string> {
   return headers;
 }
 
-type ErrorBody = { message?: string; detail?: string } | null;
+type ErrorBody = {
+  // ugsys nested envelope: { error: { code, message }, meta }
+  error?: { message?: string; code?: string };
+  // flat envelope (older pattern): { message, data }
+  message?: string;
+  // FastAPI default validation errors
+  detail?: string | { msg: string }[];
+} | null;
+
+function extractErrorMessage(body: ErrorBody, status: number): string {
+  if (!body) return `Error ${status}: solicitud fallida`;
+  // ugsys nested envelope: { error: { message: "..." } }
+  if (body.error?.message) return body.error.message;
+  // flat envelope: { message: "..." }
+  if (body.message) return body.message;
+  // FastAPI default: { detail: "..." } or { detail: [{ msg: "..." }] }
+  if (typeof body.detail === 'string') return body.detail;
+  if (Array.isArray(body.detail) && body.detail.length > 0) return body.detail[0].msg;
+  return `Error ${status}: solicitud fallida`;
+}
 
 async function parseResponse<T>(response: Response): Promise<T> {
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {
-    // Check message (ugsys envelope), then detail (FastAPI default), then generic fallback
-    const body = json as ErrorBody;
-    const message = body?.message ?? body?.detail ?? `Error ${response.status}: solicitud fallida`;
-    throw new Error(message);
+    throw new Error(extractErrorMessage(json as ErrorBody, response.status));
   }
 
   // Unwrap envelope: { data: T, meta: { ... } }
@@ -63,9 +79,7 @@ async function parseResponseRaw<T>(response: Response): Promise<T> {
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const body = json as ErrorBody;
-    const message = body?.message ?? body?.detail ?? `Error ${response.status}: solicitud fallida`;
-    throw new Error(message);
+    throw new Error(extractErrorMessage(json as ErrorBody, response.status));
   }
 
   return json as T;
