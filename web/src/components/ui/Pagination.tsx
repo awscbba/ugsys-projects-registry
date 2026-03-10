@@ -8,20 +8,13 @@ function getPageNumbers(page: number, totalPages: number): (number | '...')[] {
   if (totalPages <= 5) {
     return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
-
   const pages: (number | '...')[] = [1];
-
   if (page > 3) pages.push('...');
-
   const start = Math.max(2, page - 1);
   const end = Math.min(totalPages - 1, page + 1);
-
   for (let i = start; i <= end; i++) pages.push(i);
-
   if (page < totalPages - 2) pages.push('...');
-
   pages.push(totalPages);
-
   return pages;
 }
 
@@ -30,6 +23,13 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
 
   const pages = getPageNumbers(page, totalPages);
 
+  const navBtnClass =
+    'inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium text-white/50 ' +
+    'hover:text-white/80 hover:bg-white/[0.06] ' +
+    'disabled:opacity-30 disabled:cursor-not-allowed ' +
+    'transition-all duration-150 ' +
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9900] focus-visible:ring-offset-2 focus-visible:ring-offset-[#161d2b]';
+
   return (
     <nav aria-label="Paginación" className="flex items-center justify-center gap-1">
       <button
@@ -37,7 +37,7 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
         onClick={() => onPageChange(page - 1)}
         disabled={page === 1}
         aria-label="Página anterior"
-        className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        className={navBtnClass}
       >
         <svg
           className="h-4 w-4"
@@ -55,7 +55,7 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
         p === '...' ? (
           <span
             key={`ellipsis-${idx}`}
-            className="px-2 py-2 text-sm text-gray-400"
+            className="px-2 py-2 text-sm text-white/25"
             aria-hidden="true"
           >
             …
@@ -68,9 +68,11 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
             aria-label={`Página ${p}`}
             aria-current={p === page ? 'page' : undefined}
             className={[
-              'inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500',
-              p === page ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100',
+              'inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-all duration-150',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9900] focus-visible:ring-offset-2 focus-visible:ring-offset-[#161d2b]',
+              p === page
+                ? 'bg-[#FF9900] text-[#161d2b] shadow-[0_2px_8px_rgba(255,153,0,0.3)]'
+                : 'text-white/50 hover:text-white/80 hover:bg-white/[0.06]',
             ].join(' ')}
           >
             {p}
@@ -83,7 +85,7 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
         onClick={() => onPageChange(page + 1)}
         disabled={page === totalPages}
         aria-label="Página siguiente"
-        className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        className={navBtnClass}
       >
         <span className="mr-1">Siguiente</span>
         <svg

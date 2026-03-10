@@ -7,12 +7,12 @@ const toastConfig: Record<
   { border: string; bg: string; text: string; icon: React.ReactElement }
 > = {
   success: {
-    border: 'border-l-4 border-green-500',
-    bg: 'bg-green-50',
-    text: 'text-green-800',
+    border: 'border-l-4 border-emerald-500',
+    bg: 'bg-emerald-500/10',
+    text: 'text-emerald-300',
     icon: (
       <svg
-        className="h-5 w-5 text-green-500 shrink-0"
+        className="h-5 w-5 text-emerald-400 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -24,11 +24,11 @@ const toastConfig: Record<
   },
   error: {
     border: 'border-l-4 border-red-500',
-    bg: 'bg-red-50',
-    text: 'text-red-800',
+    bg: 'bg-red-500/10',
+    text: 'text-red-300',
     icon: (
       <svg
-        className="h-5 w-5 text-red-500 shrink-0"
+        className="h-5 w-5 text-red-400 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -45,11 +45,11 @@ const toastConfig: Record<
   },
   warning: {
     border: 'border-l-4 border-yellow-500',
-    bg: 'bg-yellow-50',
-    text: 'text-yellow-800',
+    bg: 'bg-yellow-500/10',
+    text: 'text-yellow-300',
     icon: (
       <svg
-        className="h-5 w-5 text-yellow-500 shrink-0"
+        className="h-5 w-5 text-yellow-400 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -65,12 +65,12 @@ const toastConfig: Record<
     ),
   },
   info: {
-    border: 'border-l-4 border-blue-500',
-    bg: 'bg-blue-50',
-    text: 'text-blue-800',
+    border: 'border-l-4 border-sky-500',
+    bg: 'bg-sky-500/10',
+    text: 'text-sky-300',
     icon: (
       <svg
-        className="h-5 w-5 text-blue-500 shrink-0"
+        className="h-5 w-5 text-sky-400 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -95,11 +95,14 @@ function ToastCard({ toast }: { toast: Toast }) {
       role="alert"
       aria-live="assertive"
       className={[
-        'flex items-start gap-3 rounded-md px-4 py-3 shadow-md',
+        'flex items-start gap-3 rounded-xl px-4 py-3',
+        'border border-white/[0.08]',
+        'shadow-[0_4px_24px_rgba(0,0,0,0.4)]',
+        'backdrop-blur-sm',
+        'min-w-64 max-w-sm',
         config.border,
         config.bg,
         config.text,
-        'min-w-64 max-w-sm',
       ].join(' ')}
     >
       {config.icon}
@@ -108,7 +111,7 @@ function ToastCard({ toast }: { toast: Toast }) {
         type="button"
         onClick={() => removeToast(toast.id)}
         aria-label="Cerrar notificación"
-        className="ml-1 shrink-0 rounded p-0.5 opacity-60 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
+        className="ml-1 shrink-0 rounded p-0.5 opacity-50 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
       >
         <svg
           className="h-4 w-4"

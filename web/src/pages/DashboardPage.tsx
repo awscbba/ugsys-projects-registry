@@ -11,14 +11,14 @@ export default function DashboardPage() {
   if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#FF9900]/30 border-t-[#FF9900]" />
       </div>
     );
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Mi Panel</h1>
+    <main className="mx-auto max-w-6xl px-4 sm:px-6 py-10">
+      <h1 className="mb-8 text-2xl font-bold text-white/90 tracking-tight">Mi Panel</h1>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left column */}
         <div className="space-y-6 lg:col-span-1">
@@ -27,8 +27,14 @@ export default function DashboardPage() {
         </div>
         {/* Right column */}
         <div className="lg:col-span-2">
-          <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-4 text-base font-semibold text-gray-800">Mis suscripciones</h2>
+          <div
+            className="
+              rounded-2xl p-6
+              bg-[#1e2738] border border-white/[0.07]
+              shadow-[0_4px_24px_rgba(0,0,0,0.3)]
+            "
+          >
+            <h2 className="mb-5 text-base font-semibold text-white/80">Mis suscripciones</h2>
             <SubscriptionList personId={user.sub} />
           </div>
         </div>

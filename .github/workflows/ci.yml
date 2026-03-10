@@ -3,8 +3,10 @@ name: CI
 on:
   push:
     branches: ["feature/**", "fix/**", "ci/**", "refactor/**"]
+    paths-ignore: [".kiro/**"]
   pull_request:
     branches: [main]
+    paths-ignore: [".kiro/**"]
 
 permissions:
   contents: read
