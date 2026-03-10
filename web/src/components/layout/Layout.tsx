@@ -4,7 +4,7 @@ import { Footer, UserMenu } from '@ugsys/ui-lib';
 import type { RenderLink, LinkItem } from '@ugsys/ui-lib';
 import { useAuth } from '../../hooks/useAuth';
 
-const renderLink: RenderLink = (props) => {
+const renderLink: RenderLink = (props: Parameters<RenderLink>[0]) => {
   const { href, children, className, onClick, role, tabIndex, 'aria-current': ariaCurrent } = props;
   return (
     <NavLink
