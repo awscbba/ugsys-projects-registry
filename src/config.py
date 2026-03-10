@@ -74,20 +74,30 @@ class Settings(BaseSettings):
     identity_manager_client_id: str = ""
     identity_manager_client_secret: str = ""
 
-    # ── Cognito JWT validation ───────────────────────────────────────────────
+    # ── JWT validation ───────────────────────────────────────────────────────
+    # Primary: identity-manager JWKS endpoint (RS256 tokens issued by ugsys-identity-manager)
+    # Override via IDENTITY_MANAGER_JWKS_URL env var.
+    identity_manager_jwks_url: str = "https://auth.apps.cloud.org.bo/.well-known/jwks.json"
+
+    # Legacy Cognito fields — kept for backward compat, no longer used for validation
     cognito_user_pool_id: str = ""
     cognito_client_id: str = ""
     cognito_region: str = "us-east-1"
 
     @property
     def cognito_jwks_url(self) -> str:
-        """Cognito JWKS endpoint for RS256 public key fetching."""
+        """Cognito JWKS endpoint — kept for backward compat, prefer identity_manager_jwks_url."""
         if self.cognito_user_pool_id and self.cognito_region:
             return (
                 f"https://cognito-idp.{self.cognito_region}.amazonaws.com/"
                 f"{self.cognito_user_pool_id}/.well-known/jwks.json"
             )
         return ""
+
+    @property
+    def jwks_url(self) -> str:
+        """Active JWKS URL — identity-manager takes precedence over Cognito."""
+        return self.identity_manager_jwks_url or self.cognito_jwks_url
 
     # ── Public URL ──────────────────────────────────────────────────────────
     public_base_url: str = "https://api.apps.cloud.org.bo/projects"

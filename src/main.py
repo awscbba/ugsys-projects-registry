@@ -232,8 +232,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
 # TokenValidator created at module level — construction is cheap (no I/O).
 # JWKS keys are fetched lazily on first validation request.
+# Uses identity-manager JWKS endpoint (RS256 tokens issued by ugsys-identity-manager).
 _token_validator = TokenValidator(
-    jwks_url=settings.cognito_jwks_url or None,
+    jwks_url=settings.jwks_url or None,
     jwt_algorithm="RS256",
 )
 
