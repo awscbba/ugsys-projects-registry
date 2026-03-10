@@ -4,7 +4,7 @@
  * - Adds X-Request-ID (UUID v4) on every request
  * - 401 interceptor: refresh once → retry → force logout on failure
  * - Unwraps { data, meta } envelope on success
- * - Throws Error with user-facing message on failure
+ * - Throws Error with user-facing message on failure (checks message, then detail)
  * - 15-second timeout via AbortController
  */
 
@@ -38,13 +38,15 @@ function buildHeaders(token: string | null): Record<string, string> {
   return headers;
 }
 
+type ErrorBody = { message?: string; detail?: string } | null;
+
 async function parseResponse<T>(response: Response): Promise<T> {
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const message =
-      (json as { message?: string } | null)?.message ??
-      `Request failed with status ${response.status}`;
+    // Check message (ugsys envelope), then detail (FastAPI default), then generic fallback
+    const body = json as ErrorBody;
+    const message = body?.message ?? body?.detail ?? `Error ${response.status}: solicitud fallida`;
     throw new Error(message);
   }
 
@@ -61,9 +63,8 @@ async function parseResponseRaw<T>(response: Response): Promise<T> {
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const message =
-      (json as { message?: string } | null)?.message ??
-      `Request failed with status ${response.status}`;
+    const body = json as ErrorBody;
+    const message = body?.message ?? body?.detail ?? `Error ${response.status}: solicitud fallida`;
     throw new Error(message);
   }
 
@@ -101,22 +102,17 @@ async function request<T>(
   const response = await fetchWithTimeout(url, options);
 
   if (response.status === 401 && !isRetry) {
-    // Attempt one token refresh
     const refreshToken = getRefreshToken();
     if (refreshToken && _refreshTokenFn) {
       try {
         const tokens = await _refreshTokenFn(refreshToken);
         setTokens(tokens.access_token, tokens.refresh_token);
-        // Retry original request once
         return request<T>(method, path, body, true);
       } catch {
         forceLogout();
         throw new Error('Session expired. Please log in again.');
       }
     } else {
-      // Only force logout if a session actually existed (at least one token was in memory).
-      // If both tokens are null (fresh page load / public endpoint), just throw to the caller
-      // so hooks like useProjects can set their error state without redirecting the user.
       if (getAccessToken() !== null || getRefreshToken() !== null) {
         forceLogout();
       }
@@ -168,6 +164,32 @@ async function requestRaw<T>(
   }
 
   return parseResponseRaw<T>(response);
+}
+
+/**
+ * One-off request to an explicit base URL — used by authService to target
+ * the identity-manager at VITE_AUTH_API_URL, which may differ from VITE_API_BASE_URL.
+ * Applies the same timeout, envelope unwrap, and error handling as httpClient.
+ */
+export async function makeAuthRequest<T>(
+  baseUrl: string,
+  method: string,
+  path: string,
+  body?: unknown
+): Promise<T> {
+  const url = `${baseUrl}${path}`;
+  const options: RequestInit = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Request-ID': crypto.randomUUID(),
+    },
+  };
+  if (body !== undefined) {
+    options.body = JSON.stringify(body);
+  }
+  const response = await fetchWithTimeout(url, options);
+  return parseResponse<T>(response);
 }
 
 export const httpClient = {
