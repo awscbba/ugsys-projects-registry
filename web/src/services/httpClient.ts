@@ -46,8 +46,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     // Check message (ugsys envelope), then detail (FastAPI default), then generic fallback
     const body = json as ErrorBody;
-    const message =
-      body?.message ?? body?.detail ?? `Error ${response.status}: solicitud fallida`;
+    const message = body?.message ?? body?.detail ?? `Error ${response.status}: solicitud fallida`;
     throw new Error(message);
   }
 
@@ -65,8 +64,7 @@ async function parseResponseRaw<T>(response: Response): Promise<T> {
 
   if (!response.ok) {
     const body = json as ErrorBody;
-    const message =
-      body?.message ?? body?.detail ?? `Error ${response.status}: solicitud fallida`;
+    const message = body?.message ?? body?.detail ?? `Error ${response.status}: solicitud fallida`;
     throw new Error(message);
   }
 

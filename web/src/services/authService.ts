@@ -4,8 +4,7 @@ import { httpClient, makeAuthRequest, setRefreshTokenFn } from './httpClient';
 // Auth endpoints (login, register, refresh, password) live on the identity-manager,
 // which may be on a different origin than the projects-registry API.
 // VITE_AUTH_API_URL defaults to VITE_API_BASE_URL for local dev (same origin proxy).
-const AUTH_BASE_URL =
-  import.meta.env.VITE_AUTH_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? '';
+const AUTH_BASE_URL = import.meta.env.VITE_AUTH_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? '';
 
 /**
  * Refresh token uses raw fetch (not httpClient) to avoid the circular
