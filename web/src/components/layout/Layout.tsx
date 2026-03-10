@@ -4,26 +4,21 @@ import { Footer, UserMenu } from '@ugsys/ui-lib';
 import type { RenderLink, LinkItem } from '@ugsys/ui-lib';
 import { useAuth } from '../../hooks/useAuth';
 
-const renderLink: RenderLink = ({
-  href,
-  children,
-  className,
-  onClick,
-  role,
-  tabIndex,
-  'aria-current': ariaCurrent,
-}) => (
-  <NavLink
-    to={href}
-    className={className}
-    onClick={onClick}
-    role={role}
-    tabIndex={tabIndex}
-    aria-current={ariaCurrent}
-  >
-    {children}
-  </NavLink>
-);
+const renderLink: RenderLink = (props) => {
+  const { href, children, className, onClick, role, tabIndex, 'aria-current': ariaCurrent } = props;
+  return (
+    <NavLink
+      to={href}
+      className={className}
+      onClick={onClick}
+      role={role}
+      tabIndex={tabIndex}
+      aria-current={ariaCurrent}
+    >
+      {children}
+    </NavLink>
+  );
+};
 
 const focusClass =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#4A90E2] focus-visible:outline-offset-2';
