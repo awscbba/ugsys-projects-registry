@@ -211,22 +211,22 @@ export default function Layout() {
     { label: 'Proyectos', href: '/', active: location.pathname === '/' },
     {
       label: 'Sitio Principal',
-      href: 'https://cbba.cloud.org.bo/aws',
+      href: 'https://cbba.apps.cloud.org.bo/aws',
       active: false,
       external: true,
     },
     {
       label: 'Eventos',
-      href: 'https://cbba.cloud.org.bo/aws/events',
+      href: 'https://cbba.apps.cloud.org.bo/aws/events',
       active: false,
       external: true,
     },
   ];
 
   const footerLinks: LinkItem[] = [
-    { label: 'Sitio Principal', href: 'https://cbba.cloud.org.bo/aws', external: true },
-    { label: 'Eventos', href: 'https://cbba.cloud.org.bo/aws/events', external: true },
-    { label: 'Contacto', href: 'https://cbba.cloud.org.bo/aws/contact', external: true },
+    { label: 'Sitio Principal', href: 'https://cbba.apps.cloud.org.bo/aws', external: true },
+    { label: 'Eventos', href: 'https://cbba.apps.cloud.org.bo/aws/events', external: true },
+    { label: 'Contacto', href: 'https://cbba.apps.cloud.org.bo/aws/contact', external: true },
   ];
 
   const userMenuSlot =
