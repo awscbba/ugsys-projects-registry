@@ -12,6 +12,14 @@ interface SubscriptionFormProps {
   onSuccess: (result: { subscription_id?: string }) => void;
 }
 
+const inputClass =
+  'rounded-lg border border-white/[0.1] bg-[#252f42] px-3 py-2.5 text-sm text-white/90 placeholder-white/25 ' +
+  'focus:border-[#FF9900]/50 focus:outline-none focus:ring-1 focus:ring-[#FF9900]/50 ' +
+  'disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150';
+
+const labelClass = 'text-sm font-medium text-white/60';
+const errorClass = 'text-xs text-red-400';
+
 export default function SubscriptionForm({
   projectId,
   formSchema,
@@ -20,14 +28,12 @@ export default function SubscriptionForm({
 }: SubscriptionFormProps) {
   const { user } = useAuth();
 
-  // Shared state
   const [notes, setNotes] = useState('');
   const [formValues, setFormValues] = useState<Record<string, string | string[]>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // Public-only state
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -83,7 +89,6 @@ export default function SubscriptionForm({
   async function handlePublicSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // Client-side validation
     const errors: Record<string, string> = {};
     if (!email.trim()) errors['email'] = 'El correo es obligatorio';
     if (!firstName.trim()) errors['first_name'] = 'El nombre es obligatorio';
@@ -115,9 +120,6 @@ export default function SubscriptionForm({
     }
   }
 
-  const inputClass =
-    'rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed';
-
   return (
     <form
       onSubmit={isAuthenticated ? handleAuthenticatedSubmit : handlePublicSubmit}
@@ -127,12 +129,9 @@ export default function SubscriptionForm({
       {/* Public-only fields */}
       {!isAuthenticated && (
         <>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="sub-email" className="text-sm font-medium text-gray-700">
-              Correo electrónico{' '}
-              <span className="text-red-500" aria-hidden="true">
-                *
-              </span>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="sub-email" className={labelClass}>
+              Correo electrónico <span className="text-red-400" aria-hidden="true">*</span>
             </label>
             <input
               id="sub-email"
@@ -142,19 +141,12 @@ export default function SubscriptionForm({
               disabled={isSubmitting}
               className={inputClass}
             />
-            {fieldErrors['email'] && (
-              <p className="text-xs text-red-600" role="alert">
-                {fieldErrors['email']}
-              </p>
-            )}
+            {fieldErrors['email'] && <p className={errorClass} role="alert">{fieldErrors['email']}</p>}
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="sub-first-name" className="text-sm font-medium text-gray-700">
-              Nombre{' '}
-              <span className="text-red-500" aria-hidden="true">
-                *
-              </span>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="sub-first-name" className={labelClass}>
+              Nombre <span className="text-red-400" aria-hidden="true">*</span>
             </label>
             <input
               id="sub-first-name"
@@ -164,19 +156,12 @@ export default function SubscriptionForm({
               disabled={isSubmitting}
               className={inputClass}
             />
-            {fieldErrors['first_name'] && (
-              <p className="text-xs text-red-600" role="alert">
-                {fieldErrors['first_name']}
-              </p>
-            )}
+            {fieldErrors['first_name'] && <p className={errorClass} role="alert">{fieldErrors['first_name']}</p>}
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="sub-last-name" className="text-sm font-medium text-gray-700">
-              Apellido{' '}
-              <span className="text-red-500" aria-hidden="true">
-                *
-              </span>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="sub-last-name" className={labelClass}>
+              Apellido <span className="text-red-400" aria-hidden="true">*</span>
             </label>
             <input
               id="sub-last-name"
@@ -186,18 +171,14 @@ export default function SubscriptionForm({
               disabled={isSubmitting}
               className={inputClass}
             />
-            {fieldErrors['last_name'] && (
-              <p className="text-xs text-red-600" role="alert">
-                {fieldErrors['last_name']}
-              </p>
-            )}
+            {fieldErrors['last_name'] && <p className={errorClass} role="alert">{fieldErrors['last_name']}</p>}
           </div>
         </>
       )}
 
-      {/* Notes (optional, both flows) */}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="sub-notes" className="text-sm font-medium text-gray-700">
+      {/* Notes */}
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="sub-notes" className={labelClass}>
           Notas (opcional)
         </label>
         <textarea
@@ -210,7 +191,7 @@ export default function SubscriptionForm({
         />
       </div>
 
-      {/* Dynamic form fields (authenticated only) */}
+      {/* Dynamic form fields */}
       {isAuthenticated && formSchema && formSchema.fields.length > 0 && (
         <DynamicFormRenderer
           schema={formSchema}
@@ -221,9 +202,8 @@ export default function SubscriptionForm({
         />
       )}
 
-      {/* API error */}
       {apiError && (
-        <p className="text-sm text-red-600 rounded-md bg-red-50 px-3 py-2" role="alert">
+        <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2" role="alert">
           {apiError}
         </p>
       )}
@@ -231,7 +211,13 @@ export default function SubscriptionForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="
+          rounded-lg bg-[#FF9900] px-4 py-2.5 text-sm font-semibold text-[#161d2b]
+          hover:bg-[#ffb84d] disabled:opacity-50 disabled:cursor-not-allowed
+          transition-all duration-150 active:scale-[0.99]
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9900] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e2738]
+          shadow-[0_2px_12px_rgba(255,153,0,0.25)]
+        "
       >
         {isSubmitting ? 'Enviando…' : 'Suscribirse'}
       </button>

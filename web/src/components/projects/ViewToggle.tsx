@@ -51,7 +51,7 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
     <div
       role="group"
       aria-label="Cambiar vista"
-      className="inline-flex rounded-md shadow-sm border border-gray-200 overflow-hidden"
+      className="inline-flex rounded-lg overflow-hidden border border-white/[0.08] bg-[#1e2738]"
     >
       {OPTIONS.map(({ value, label, icon }) => {
         const active = view === value;
@@ -63,9 +63,15 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
             aria-label={label}
             title={label}
             onClick={() => handleChange(value)}
-            className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 ${
-              active ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
+            className={`
+              flex items-center gap-1.5 px-3 py-2 text-sm font-medium
+              transition-all duration-150
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FF9900]
+              ${active
+                ? 'bg-[#FF9900] text-[#161d2b] shadow-[0_0_12px_rgba(255,153,0,0.3)]'
+                : 'text-white/50 hover:text-white/80 hover:bg-white/[0.05]'
+              }
+            `}
           >
             <svg
               className="w-4 h-4"

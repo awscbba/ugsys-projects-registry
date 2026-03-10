@@ -2,10 +2,10 @@ import { useNavigate } from 'react-router-dom';
 import type { Project, ProjectStatus } from '@/types/project';
 
 const STATUS_STYLES: Record<ProjectStatus, string> = {
-  pending: 'bg-gray-100 text-gray-700',
-  active: 'bg-green-100 text-green-700',
-  completed: 'bg-blue-100 text-blue-700',
-  cancelled: 'bg-red-100 text-red-700',
+  pending: 'bg-yellow-500/15 text-yellow-300 ring-1 ring-yellow-500/30',
+  active: 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30',
+  completed: 'bg-sky-500/15 text-sky-300 ring-1 ring-sky-500/30',
+  cancelled: 'bg-red-500/15 text-red-300 ring-1 ring-red-500/30',
 };
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
@@ -23,18 +23,28 @@ export default function ProjectCompact({ projects }: ProjectCompactProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="overflow-x-auto rounded-lg shadow">
-      <table className="min-w-full bg-white text-sm">
-        <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
-          <tr>
-            <th className="px-4 py-3 text-left">Nombre</th>
-            <th className="px-4 py-3 text-left">Categoría</th>
-            <th className="px-4 py-3 text-left">Participantes</th>
-            <th className="px-4 py-3 text-left">Estado</th>
-            <th className="px-4 py-3 text-left">Acción</th>
+    <div className="overflow-x-auto rounded-xl border border-white/[0.07] shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
+      <table className="min-w-full text-sm">
+        <thead>
+          <tr className="bg-[#252f42] border-b border-white/[0.07]">
+            <th className="px-4 py-3 text-left text-xs font-semibold text-white/40 uppercase tracking-wider">
+              Nombre
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-semibold text-white/40 uppercase tracking-wider">
+              Categoría
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-semibold text-white/40 uppercase tracking-wider">
+              Participantes
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-semibold text-white/40 uppercase tracking-wider">
+              Estado
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-semibold text-white/40 uppercase tracking-wider">
+              Acción
+            </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="bg-[#1e2738] divide-y divide-white/[0.05]">
           {projects.map((project) => {
             const participantLabel =
               project.max_participants != null
@@ -42,16 +52,17 @@ export default function ProjectCompact({ projects }: ProjectCompactProps) {
                 : `${project.current_participants}`;
 
             return (
-              <tr key={project.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">
+              <tr
+                key={project.id}
+                className="transition-colors duration-150 hover:bg-[#252f42]"
+              >
+                <td className="px-4 py-3 font-medium text-white/85 max-w-xs truncate">
                   {project.name}
                 </td>
-                <td className="px-4 py-3 text-gray-600">{project.category}</td>
-                <td className="px-4 py-3 text-gray-600">{participantLabel}</td>
+                <td className="px-4 py-3 text-white/50">{project.category}</td>
+                <td className="px-4 py-3 text-white/50">{participantLabel}</td>
                 <td className="px-4 py-3">
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[project.status]}`}
-                  >
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[project.status]}`}>
                     {STATUS_LABELS[project.status]}
                   </span>
                 </td>
@@ -59,9 +70,13 @@ export default function ProjectCompact({ projects }: ProjectCompactProps) {
                   <button
                     type="button"
                     onClick={() => navigate(`/subscribe/${project.id}`)}
-                    className="text-indigo-600 hover:text-indigo-800 font-medium focus:outline-none focus:underline"
+                    className="
+                      text-[#FF9900] hover:text-[#ffb84d] font-semibold text-xs
+                      transition-colors duration-150
+                      focus:outline-none focus-visible:underline
+                    "
                   >
-                    Suscribirse
+                    Suscribirse →
                   </button>
                 </td>
               </tr>

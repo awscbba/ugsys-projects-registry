@@ -13,11 +13,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-indigo-600 text-white hover:bg-indigo-700 focus-visible:ring-indigo-500',
+  primary:
+    'bg-[#FF9900] text-[#161d2b] hover:bg-[#ffb84d] focus-visible:ring-[#FF9900] shadow-[0_2px_12px_rgba(255,153,0,0.25)]',
   secondary:
-    'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus-visible:ring-gray-400',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
-  ghost: 'text-gray-600 hover:bg-gray-100 focus-visible:ring-gray-400',
+    'bg-transparent text-white/70 border border-white/[0.12] hover:border-white/25 hover:text-white/90 hover:bg-white/[0.05] focus-visible:ring-white/30',
+  danger:
+    'bg-red-500/15 text-red-300 border border-red-500/25 hover:bg-red-500/25 focus-visible:ring-red-500',
+  ghost:
+    'text-white/50 hover:text-white/80 hover:bg-white/[0.06] focus-visible:ring-white/30',
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -44,9 +47,9 @@ export function Button({
       disabled={isDisabled}
       aria-disabled={isDisabled}
       className={[
-        'inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-150',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#161d2b]',
+        'disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]',
         variantClasses[variant],
         sizeClasses[size],
         className,

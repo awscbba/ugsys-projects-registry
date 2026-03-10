@@ -8,6 +8,11 @@ interface DynamicFormRendererProps {
   disabled?: boolean;
 }
 
+const inputClass =
+  'rounded-lg border border-white/[0.1] bg-[#252f42] px-3 py-2.5 text-sm text-white/90 ' +
+  'focus:border-[#FF9900]/50 focus:outline-none focus:ring-1 focus:ring-[#FF9900]/50 ' +
+  'disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150';
+
 export default function DynamicFormRenderer({
   schema,
   values,
@@ -23,13 +28,11 @@ export default function DynamicFormRenderer({
         const inputId = `field-${field.id}`;
 
         return (
-          <div key={field.id} className="flex flex-col gap-1">
-            <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
+          <div key={field.id} className="flex flex-col gap-1.5">
+            <label htmlFor={inputId} className="text-sm font-medium text-white/60">
               {field.question}
               {field.required && (
-                <span className="ml-1 text-red-500" aria-hidden="true">
-                  *
-                </span>
+                <span className="ml-1 text-red-400" aria-hidden="true">*</span>
               )}
             </label>
 
@@ -40,7 +43,7 @@ export default function DynamicFormRenderer({
                 value={typeof value === 'string' ? value : ''}
                 onChange={(e) => onChange(field.id, e.target.value)}
                 disabled={disabled}
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className={inputClass}
               />
             )}
 
@@ -51,7 +54,7 @@ export default function DynamicFormRenderer({
                 value={typeof value === 'string' ? value : ''}
                 onChange={(e) => onChange(field.id, e.target.value)}
                 disabled={disabled}
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed resize-y"
+                className={`${inputClass} resize-y`}
               />
             )}
 
@@ -62,7 +65,7 @@ export default function DynamicFormRenderer({
                 value={typeof value === 'string' ? value : ''}
                 onChange={(e) => onChange(field.id, e.target.value)}
                 disabled={disabled}
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className={inputClass}
               />
             )}
 
@@ -73,7 +76,7 @@ export default function DynamicFormRenderer({
                 value={typeof value === 'string' ? value : ''}
                 onChange={(e) => onChange(field.id, e.target.value)}
                 disabled={disabled}
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className={inputClass}
               />
             )}
 
@@ -82,7 +85,7 @@ export default function DynamicFormRenderer({
                 {(field.options ?? []).map((option) => (
                   <label
                     key={option}
-                    className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
+                    className="flex items-center gap-2.5 text-sm text-white/60 cursor-pointer hover:text-white/80 transition-colors"
                   >
                     <input
                       type="radio"
@@ -91,7 +94,7 @@ export default function DynamicFormRenderer({
                       checked={value === option}
                       onChange={() => onChange(field.id, option)}
                       disabled={disabled}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="accent-[#FF9900] focus:ring-[#FF9900]"
                     />
                     {option}
                   </label>
@@ -107,7 +110,7 @@ export default function DynamicFormRenderer({
                   return (
                     <label
                       key={option}
-                      className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
+                      className="flex items-center gap-2.5 text-sm text-white/60 cursor-pointer hover:text-white/80 transition-colors"
                     >
                       <input
                         type="checkbox"
@@ -120,7 +123,7 @@ export default function DynamicFormRenderer({
                           onChange(field.id, next);
                         }}
                         disabled={disabled}
-                        className="text-indigo-600 focus:ring-indigo-500 rounded"
+                        className="accent-[#FF9900] focus:ring-[#FF9900] rounded"
                       />
                       {option}
                     </label>
@@ -130,9 +133,7 @@ export default function DynamicFormRenderer({
             )}
 
             {error && (
-              <p className="text-xs text-red-600" role="alert">
-                {error}
-              </p>
+              <p className="text-xs text-red-400" role="alert">{error}</p>
             )}
           </div>
         );

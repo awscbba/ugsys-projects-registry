@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { authService } from '@/services/authService';
 import { addToast } from '@/stores/toastStore';
 
+const inputClass =
+  'w-full rounded-lg border border-white/[0.1] bg-[#252f42] px-3 py-2 text-sm text-white/90 ' +
+  'focus:border-[#FF9900]/50 focus:outline-none focus:ring-1 focus:ring-[#FF9900]/50 ' +
+  'disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150';
+
 export default function PasswordChange() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -35,14 +40,17 @@ export default function PasswordChange() {
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-base font-semibold text-gray-800">Cambiar contraseña</h2>
+    <div
+      className="
+        rounded-2xl p-5
+        bg-[#1e2738] border border-white/[0.07]
+        shadow-[0_4px_24px_rgba(0,0,0,0.3)]
+      "
+    >
+      <h2 className="mb-4 text-base font-semibold text-white/80">Cambiar contraseña</h2>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label
-            htmlFor="current-password"
-            className="mb-1 block text-xs font-medium text-gray-600"
-          >
+          <label htmlFor="current-password" className="mb-1.5 block text-xs font-medium text-white/50">
             Contraseña actual
           </label>
           <input
@@ -51,11 +59,11 @@ export default function PasswordChange() {
             required
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={inputClass}
           />
         </div>
         <div>
-          <label htmlFor="new-password" className="mb-1 block text-xs font-medium text-gray-600">
+          <label htmlFor="new-password" className="mb-1.5 block text-xs font-medium text-white/50">
             Nueva contraseña
           </label>
           <input
@@ -64,14 +72,11 @@ export default function PasswordChange() {
             required
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={inputClass}
           />
         </div>
         <div>
-          <label
-            htmlFor="confirm-password"
-            className="mb-1 block text-xs font-medium text-gray-600"
-          >
+          <label htmlFor="confirm-password" className="mb-1.5 block text-xs font-medium text-white/50">
             Confirmar nueva contraseña
           </label>
           <input
@@ -80,23 +85,29 @@ export default function PasswordChange() {
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={inputClass}
           />
         </div>
 
         {error && (
-          <p className="text-xs text-red-600" role="alert">
+          <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2" role="alert">
             {error}
           </p>
         )}
         {success && !error && (
-          <p className="text-xs text-green-600">Contraseña actualizada correctamente.</p>
+          <p className="text-xs text-emerald-400">Contraseña actualizada correctamente.</p>
         )}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="
+            w-full rounded-lg bg-[#FF9900] px-4 py-2 text-sm font-semibold text-[#161d2b]
+            hover:bg-[#ffb84d] disabled:opacity-50 disabled:cursor-not-allowed
+            transition-all duration-150
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9900] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e2738]
+            shadow-[0_2px_8px_rgba(255,153,0,0.2)]
+          "
         >
           {isSubmitting ? 'Actualizando...' : 'Actualizar contraseña'}
         </button>

@@ -5,17 +5,52 @@
 @source '../../node_modules/@ugsys/ui-lib/dist';
 
 /* Mirror design tokens as Tailwind theme values */
-@theme {
+@theme inline {
   --color-primary: var(--color-primary);
   --color-brand: var(--color-brand);
   --color-accent: var(--color-accent);
   --color-footer: var(--color-footer);
   --color-background: var(--color-background);
   --font-family-sans: var(--font-sans);
+
+  /* Extended dark surface palette */
+  --color-surface-1: #1e2738;
+  --color-surface-2: #252f42;
+  --color-surface-3: #2d3a52;
+  --color-surface-border: rgba(255, 255, 255, 0.08);
+  --color-text-muted: rgba(255, 255, 255, 0.55);
+  --color-text-subtle: rgba(255, 255, 255, 0.35);
 }
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 min-h-screen;
+    background-color: #161d2b;
+    color: #f0f4ff;
+    min-height: 100vh;
+    font-family: var(--font-sans, system-ui, sans-serif);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  /* Gradient text utility */
+  .text-gradient {
+    background: linear-gradient(135deg, #FF9900 0%, #ffb84d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Card glow on hover */
+  .card-glow:hover {
+    box-shadow:
+      0 0 0 1px rgba(255, 153, 0, 0.25),
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 24px rgba(255, 153, 0, 0.08);
+  }
+
+  /* Subtle gradient border */
+  .border-gradient {
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 }

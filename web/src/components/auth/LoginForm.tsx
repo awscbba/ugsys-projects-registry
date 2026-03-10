@@ -3,6 +3,13 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { login } from '../../stores/authStore';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
 
+const inputClass =
+  'w-full rounded-lg border border-white/[0.1] bg-[#252f42] px-3 py-2.5 text-sm text-white/90 placeholder-white/25 ' +
+  'focus:border-[#FF9900]/50 focus:outline-none focus:ring-1 focus:ring-[#FF9900]/50 ' +
+  'transition-colors duration-150';
+
+const labelClass = 'mb-1.5 block text-sm font-medium text-white/60';
+
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +39,7 @@ export function LoginForm() {
     <>
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <div>
-          <label htmlFor="login-email" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="login-email" className={labelClass}>
             Correo electrónico
           </label>
           <input
@@ -42,13 +49,13 @@ export function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={inputClass}
             placeholder="tu@correo.com"
           />
         </div>
 
         <div>
-          <label htmlFor="login-password" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="login-password" className={labelClass}>
             Contraseña
           </label>
           <input
@@ -58,28 +65,38 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className={inputClass}
           />
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="
+            w-full rounded-lg bg-[#FF9900] px-4 py-2.5 text-sm font-semibold text-[#161d2b]
+            hover:bg-[#ffb84d] disabled:opacity-50 disabled:cursor-not-allowed
+            transition-all duration-150 active:scale-[0.99]
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9900] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e2738]
+            shadow-[0_2px_12px_rgba(255,153,0,0.25)]
+          "
         >
           {isLoading ? 'Ingresando...' : 'Iniciar sesión'}
         </button>
 
-        <div className="flex items-center justify-between text-sm">
-          <Link to="/register" className="text-blue-600 hover:underline">
+        <div className="flex items-center justify-between text-sm pt-1">
+          <Link to="/register" className="text-[#FF9900] hover:text-[#ffb84d] transition-colors">
             Crear cuenta
           </Link>
           <button
             type="button"
             onClick={() => setShowForgot(true)}
-            className="text-gray-500 hover:underline"
+            className="text-white/40 hover:text-white/60 transition-colors"
           >
             ¿Olvidaste tu contraseña?
           </button>
