@@ -233,9 +233,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 # TokenValidator created at module level — construction is cheap (no I/O).
 # JWKS keys are fetched lazily on first validation request.
 # Uses identity-manager JWKS endpoint (RS256 tokens issued by ugsys-identity-manager).
+# audience= is required: IM access tokens include aud: "admin-panel". Without it,
+# PyJWT raises InvalidAudienceError -> validate() returns None -> 401 on every request.
 _token_validator = TokenValidator(
     jwks_url=settings.jwks_url or None,
     jwt_algorithm="RS256",
+    audience=settings.jwt_audience,
 )
 
 
