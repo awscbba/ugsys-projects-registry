@@ -26,7 +26,7 @@ export function LoginForm() {
     setError(null);
     try {
       await login(email, password);
-      const redirect = searchParams.get('redirect') ?? '/dashboard';
+      const redirect = searchParams.get('redirect') ?? '/';
       navigate(redirect, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Credenciales inválidas');
