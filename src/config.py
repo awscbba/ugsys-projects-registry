@@ -79,6 +79,13 @@ class Settings(BaseSettings):
     # Override via IDENTITY_MANAGER_JWKS_URL env var.
     identity_manager_jwks_url: str = "https://auth.apps.cloud.org.bo/.well-known/jwks.json"
 
+    # Expected audience claim in access tokens issued by ugsys-identity-manager.
+    # IM encodes aud: "admin-panel" in all access tokens. PyJWT rejects tokens
+    # that have an aud claim if no audience is passed to decode() — this was the
+    # root cause of AUTHENTICATION_REQUIRED 401 in projects-registry.
+    # Override via JWT_AUDIENCE env var if IM is reconfigured.
+    jwt_audience: str = "admin-panel"
+
     # Legacy Cognito fields — kept for backward compat, no longer used for validation
     cognito_user_pool_id: str = ""
     cognito_client_id: str = ""
