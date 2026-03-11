@@ -2221,7 +2221,7 @@ wheels = [
 [[package]]
 name = "ugsys-auth-client"
 version = "0.2.0"
-source = { git = "https://github.com/awscbba/ugsys-shared-libs?subdirectory=auth-client&tag=auth-client%2Fv0.2.0#c1f7c31b74b30512bf51efb0055fa55ea336e811" }
+source = { git = "https://github.com/awscbba/ugsys-shared-libs?subdirectory=auth-client&tag=auth-client%2Fv0.2.1#c409553cb89850ee3f707a1d5683a41793d75e84" }
 dependencies = [
     { name = "fastapi" },
     { name = "httpx" },
@@ -2308,7 +2308,7 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4" },
     { name = "safety", marker = "extra == 'dev'", specifier = ">=3.2" },
     { name = "structlog", specifier = ">=24.1" },
-    { name = "ugsys-auth-client", git = "https://github.com/awscbba/ugsys-shared-libs?subdirectory=auth-client&tag=auth-client%2Fv0.2.0" },
+    { name = "ugsys-auth-client", git = "https://github.com/awscbba/ugsys-shared-libs?subdirectory=auth-client&tag=auth-client%2Fv0.2.1" },
     { name = "ugsys-event-lib", git = "https://github.com/awscbba/ugsys-shared-libs?subdirectory=event-lib&tag=event-lib%2Fv0.1.0" },
     { name = "ugsys-logging-lib", git = "https://github.com/awscbba/ugsys-shared-libs?subdirectory=logging-lib&tag=logging-lib%2Fv0.1.0" },
     { name = "ugsys-logging-lib", marker = "extra == 'logging'", git = "https://github.com/awscbba/ugsys-shared-libs?subdirectory=logging-lib&tag=logging-lib%2Fv0.1.0" },
