@@ -1,9 +1,13 @@
 /**
  * Bug condition exploration tests — Task 1
  *
- * These tests assert the BUGGY state.
- * They MUST PASS on unfixed code — passing confirms the bug exists.
- * They MUST FAIL after the fix is applied (Task 3.5 verification).
+ * These tests assert the BUGGY state and are INTENTIONALLY SKIPPED after the fix.
+ * They served their purpose: confirming the bug existed before the fix was applied.
+ *
+ * History:
+ *   - Written on unfixed code: all 3 PASSED (confirmed bug existed)
+ *   - After fix applied (Task 3.5): all 3 FAILED (confirmed fix removed the bug)
+ *   - Skipped permanently so CI stays green while preserving the documentation
  *
  * Bug condition C(X):
  *   dashboardRouteExists  = router contains path="/dashboard" rendering DashboardPage
@@ -46,7 +50,7 @@ vi.mock('../../stores/authStore', () => ({
 
 // ── Test 1: Router contains /dashboard rendering DashboardPage ────────────────
 
-describe('Bug condition: /dashboard route renders DashboardPage', () => {
+describe.skip('Bug condition: /dashboard route renders DashboardPage', () => {
   it('router.routes includes a route with path="/dashboard"', async () => {
     const { router } = await import('../router');
 
@@ -66,8 +70,8 @@ describe('Bug condition: /dashboard route renders DashboardPage', () => {
     expect(element?.type).not.toBeUndefined();
     const typeName =
       typeof element?.type === 'function'
-        ? (element.type as { name?: string; displayName?: string }).name ??
-          (element.type as { name?: string; displayName?: string }).displayName
+        ? ((element.type as { name?: string; displayName?: string }).name ??
+          (element.type as { name?: string; displayName?: string }).displayName)
         : String(element?.type);
     // On UNFIXED code: typeName is "DashboardPage" → PASSES
     // After fix: typeName is "Navigate" → FAILS
@@ -77,7 +81,7 @@ describe('Bug condition: /dashboard route renders DashboardPage', () => {
 
 // ── Test 2: Layout passes profileHref="/dashboard" to UserMenu ────────────────
 
-describe('Bug condition: Layout passes profileHref="/dashboard" to UserMenu', () => {
+describe.skip('Bug condition: Layout passes profileHref="/dashboard" to UserMenu', () => {
   beforeEach(() => {
     vi.resetModules();
   });
@@ -100,7 +104,7 @@ describe('Bug condition: Layout passes profileHref="/dashboard" to UserMenu', ()
 
 // ── Test 3: LoginForm navigates to /dashboard on success with no redirect param ─
 
-describe('Bug condition: LoginForm fallback redirect is "/dashboard"', () => {
+describe.skip('Bug condition: LoginForm fallback redirect is "/dashboard"', () => {
   it('navigates to "/dashboard" after login when no ?redirect= param is present', async () => {
     const navigateMock = vi.fn();
     vi.doMock('react-router-dom', async (importOriginal) => {

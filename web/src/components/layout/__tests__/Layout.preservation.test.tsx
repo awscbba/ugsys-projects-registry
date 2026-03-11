@@ -103,9 +103,7 @@ describe('Preservation: UserMenu receives correct props', () => {
       </MemoryRouter>
     );
     const userMenu = screen.getByTestId('user-menu');
-    expect(userMenu.getAttribute('data-admin-panel-url')).toBe(
-      'https://admin.apps.cloud.org.bo'
-    );
+    expect(userMenu.getAttribute('data-admin-panel-url')).toBe('https://admin.apps.cloud.org.bo');
   });
 
   it('passes user.email to UserMenu', () => {
