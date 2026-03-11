@@ -235,7 +235,7 @@ export default function Layout() {
         user={{ name: user.email, email: user.email, roles: user.roles, avatarUrl: undefined }}
         onLogout={logout}
         adminPanelUrl="https://admin.apps.cloud.org.bo"
-        profileHref="/dashboard"
+        profileHref="https://profile.apps.cloud.org.bo"
         renderLink={renderLink}
       />
     ) : (
