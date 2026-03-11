@@ -9,12 +9,13 @@ const AUTH_BASE_URL = import.meta.env.VITE_AUTH_API_URL ?? import.meta.env.VITE_
 /**
  * Refresh token uses raw fetch (not httpClient) to avoid the circular
  * 401-refresh loop that would occur if httpClient called this.
+ * No token argument — the httpOnly cookie is sent automatically via credentials:'include'.
  */
-async function refreshToken(token: string): Promise<TokenPair> {
+async function refreshToken(): Promise<TokenPair> {
   const response = await fetch(`${AUTH_BASE_URL}/api/v1/auth/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token: token }),
+    credentials: 'include', // sends the httpOnly refresh cookie cross-subdomain
   });
 
   if (!response.ok) {
@@ -26,7 +27,7 @@ async function refreshToken(token: string): Promise<TokenPair> {
   return (json.data ?? json) as TokenPair;
 }
 
-// Register the refresh function with httpClient
+// Register the cookie-based refresh function with httpClient
 setRefreshTokenFn(refreshToken);
 
 export const authService = {

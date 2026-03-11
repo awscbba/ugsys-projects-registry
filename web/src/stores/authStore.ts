@@ -1,31 +1,23 @@
 import { atom, computed } from 'nanostores';
-import type { AuthUser, TokenPair } from '../types/auth';
+import type { AuthUser } from '../types/auth';
 
 // ── In-memory token storage — never written to localStorage ──────────────────
 
 let _accessToken: string | null = null;
-let _refreshToken: string | null = null;
 
 /** Called by httpClient — reads from memory, not localStorage */
 export function getAccessToken(): string | null {
   return _accessToken;
 }
 
-/** Called by httpClient — reads from memory, not localStorage */
-export function getRefreshToken(): string | null {
-  return _refreshToken;
-}
-
 /** Called by httpClient after a successful token refresh */
-export function setTokens(accessToken: string, refreshToken: string): void {
+export function setTokens(accessToken: string): void {
   _accessToken = accessToken;
-  _refreshToken = refreshToken;
 }
 
 /** Called by httpClient on refresh failure or explicit logout */
 export function clearTokens(): void {
   _accessToken = null;
-  _refreshToken = null;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -64,18 +56,44 @@ export const $user = atom<AuthUser | null>(null);
 export const $isLoading = atom<boolean>(false);
 export const $isAuthenticated = computed($user, (user) => user !== null);
 
+// ── Auth base URL (identity-manager may be on a different origin) ─────────────
+
+const AUTH_BASE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_AUTH_API_URL) ??
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) ??
+  '';
+
 // ── Actions ───────────────────────────────────────────────────────────────────
 
 /**
- * Call once on app startup. Tokens are in-memory only — no localStorage hydration.
- * If the user refreshes the page, they will need to log in again.
+ * Call once on app startup. Attempts a silent token refresh using the httpOnly
+ * cookie set by the identity-manager. On success, hydrates $user from the new
+ * access token. On 401 or network error, stays unauthenticated silently.
  */
-export function initializeAuth(): void {
-  // No-op: tokens are not persisted. Session is lost on page reload by design.
+export async function initializeAuth(): Promise<void> {
+  try {
+    const response = await fetch(`${AUTH_BASE_URL}/api/v1/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // sends the httpOnly cookie cross-subdomain
+    });
+    if (!response.ok) {
+      // 401 = no valid session — stay unauthenticated, no throw
+      return;
+    }
+    const json = await response.json();
+    const data = json.data ?? json;
+    const accessToken: string = data.access_token;
+    _accessToken = accessToken;
+    $user.set(extractUser(accessToken));
+  } catch {
+    // Network error — stay unauthenticated, no throw
+  }
 }
 
 /**
- * Authenticate with email + password. Stores tokens in memory only (not localStorage).
+ * Authenticate with email + password. Stores access token in memory only.
+ * The refresh token is managed as an httpOnly cookie by the identity-manager.
  * Sets $user from the returned access_token claims.
  */
 export async function login(email: string, password: string): Promise<void> {
@@ -83,9 +101,9 @@ export async function login(email: string, password: string): Promise<void> {
   try {
     // Import lazily to avoid circular dependency (authService → httpClient → authStore)
     const { authService } = await import('../services/authService');
-    const tokens: TokenPair = await authService.login(email, password);
+    const tokens = await authService.login(email, password);
     _accessToken = tokens.access_token;
-    _refreshToken = tokens.refresh_token;
+    // refresh_token is NOT stored in JS — it lives in the httpOnly cookie
     const user = extractUser(tokens.access_token);
     $user.set(user);
   } finally {
@@ -95,15 +113,15 @@ export async function login(email: string, password: string): Promise<void> {
 
 /**
  * Clear in-memory session and redirect to home.
+ * The server-side logout call clears the httpOnly cookie.
  */
 export async function logout(): Promise<void> {
   _accessToken = null;
-  _refreshToken = null;
   $user.set(null);
   try {
     // Import lazily to avoid circular dependency (httpClient imports authStore)
     const { httpClient } = await import('../services/httpClient');
-    await httpClient.post('/api/v1/auth/logout');
+    await httpClient.post('/api/v1/auth/logout', undefined, { credentials: 'include' });
   } catch {
     // best-effort — session already cleared client-side
   }
