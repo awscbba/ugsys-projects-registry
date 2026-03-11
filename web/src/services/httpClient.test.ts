@@ -3,11 +3,11 @@
  *
  * Exploration tests (describe 'Bug condition (b)'):
  *   MUST FAIL on unfixed code — confirms forceLogout() fires unconditionally on 401
- *   MUST PASS after fix (Task 3.4 verification)
+ *   MUST PASS after fix (Task 3.7 verification)
  *
  * Preservation tests (describe 'Preservation'):
  *   MUST PASS on unfixed code — confirms baseline behavior to preserve
- *   MUST STILL PASS after fix (Task 3.5 verification)
+ *   MUST STILL PASS after fix (Task 3.9 verification)
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -17,12 +17,11 @@ import * as fc from 'fast-check';
 
 vi.mock('../stores/authStore', () => ({
   getAccessToken: vi.fn(),
-  getRefreshToken: vi.fn(),
   setTokens: vi.fn(),
   clearTokens: vi.fn(),
 }));
 
-import { getAccessToken, getRefreshToken, setTokens, clearTokens } from '../stores/authStore';
+import { getAccessToken, setTokens, clearTokens } from '../stores/authStore';
 import { httpClient, setRefreshTokenFn } from './httpClient';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -49,15 +48,12 @@ function mock500Response(): Response {
 }
 
 // ── Bug condition (b): Public 401 with no session ─────────────────────────────
-// On UNFIXED code: forceLogout() fires → window.location.href = '/login' → FAILS assertion
-// On FIXED code:   error is thrown to caller, no redirect → PASSES
 
 describe('Bug condition (b): public 401 with no session tokens', () => {
   let hrefSetter: ReturnType<typeof vi.fn>;
   let originalDescriptor: PropertyDescriptor | undefined;
 
   beforeEach(() => {
-    // Spy on window.location.href setter
     hrefSetter = vi.fn();
     originalDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
     Object.defineProperty(window, 'location', {
@@ -72,7 +68,6 @@ describe('Bug condition (b): public 401 with no session tokens', () => {
 
     // No tokens in memory — fresh page load
     vi.mocked(getAccessToken).mockReturnValue(null);
-    vi.mocked(getRefreshToken).mockReturnValue(null);
 
     // No refresh function registered
     setRefreshTokenFn(null as never);
@@ -85,7 +80,7 @@ describe('Bug condition (b): public 401 with no session tokens', () => {
     vi.clearAllMocks();
   });
 
-  it('does NOT call forceLogout (set window.location.href) on 401 when both tokens are null', async () => {
+  it('does NOT call forceLogout (set window.location.href) on 401 when access token is null', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mock401Response()));
 
     try {
@@ -97,7 +92,7 @@ describe('Bug condition (b): public 401 with no session tokens', () => {
     expect(hrefSetter).not.toHaveBeenCalledWith('/login');
   });
 
-  it('throws an Error to the caller on 401 when both tokens are null', async () => {
+  it('throws an Error to the caller on 401 when access token is null', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mock401Response()));
 
     await expect(httpClient.get('/api/v1/projects/public')).rejects.toThrow();
@@ -109,7 +104,6 @@ describe('Bug condition (b): public 401 with no session tokens', () => {
       fc.asyncProperty(fc.webPath(), async (path) => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mock401Response()));
         vi.mocked(getAccessToken).mockReturnValue(null);
-        vi.mocked(getRefreshToken).mockReturnValue(null);
 
         try {
           await httpClient.get(path);
@@ -125,8 +119,7 @@ describe('Bug condition (b): public 401 with no session tokens', () => {
   });
 });
 
-// ── Preservation: Authenticated 401 → refresh → retry ────────────────────────
-// MUST PASS on unfixed code AND after fix
+// ── Preservation: Authenticated 401 → cookie-based refresh → retry ────────────
 
 describe('Preservation: authenticated 401 → refresh → retry flow', () => {
   let hrefSetter: ReturnType<typeof vi.fn>;
@@ -154,11 +147,11 @@ describe('Preservation: authenticated 401 → refresh → retry flow', () => {
     vi.clearAllMocks();
   });
 
-  it('retries original request with new token after successful refresh (req 3.1)', async () => {
-    // Arrange — refresh token present, refresh succeeds
+  it('retries original request with new token after successful cookie-based refresh (req 3.1)', async () => {
+    // Arrange — access token expired, refresh function registered (cookie-based, no arg)
     vi.mocked(getAccessToken).mockReturnValue(null);
-    vi.mocked(getRefreshToken).mockReturnValue('valid-refresh-token');
 
+    // Cookie-based refresh — no token argument
     const refreshFn = vi.fn().mockResolvedValue({
       access_token: 'new-access-token',
       refresh_token: 'new-refresh-token',
@@ -174,17 +167,16 @@ describe('Preservation: authenticated 401 → refresh → retry flow', () => {
 
     const result = await httpClient.get('/api/v1/projects/p1');
 
-    expect(refreshFn).toHaveBeenCalledWith('valid-refresh-token');
-    expect(setTokens).toHaveBeenCalledWith('new-access-token', 'new-refresh-token');
+    // Cookie-based refresh — called with NO arguments
+    expect(refreshFn).toHaveBeenCalledWith();
+    expect(setTokens).toHaveBeenCalledWith('new-access-token');
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(hrefSetter).not.toHaveBeenCalledWith('/login');
     expect(result).toEqual({ id: 'p1' });
   });
 
-  it('calls forceLogout when refresh token present but refresh fails (req 3.2)', async () => {
-    // Arrange — refresh token present, but refresh throws
+  it('calls forceLogout when refresh function present but refresh fails (req 3.2)', async () => {
     vi.mocked(getAccessToken).mockReturnValue(null);
-    vi.mocked(getRefreshToken).mockReturnValue('expired-refresh-token');
 
     const refreshFn = vi.fn().mockRejectedValue(new Error('Refresh failed'));
     setRefreshTokenFn(refreshFn);
@@ -197,17 +189,16 @@ describe('Preservation: authenticated 401 → refresh → retry flow', () => {
     expect(hrefSetter).toHaveBeenCalledWith('/login');
   });
 
-  // Property-based: for any refresh token value, if refresh succeeds → no forceLogout
-  it('Property: for any valid refresh token, successful refresh never triggers forceLogout', async () => {
+  // Property-based: if cookie-based refresh succeeds → no forceLogout
+  it('Property: successful cookie-based refresh never triggers forceLogout', async () => {
     await fc.assert(
       fc.asyncProperty(
         fc.string({ minLength: 10, maxLength: 100 }),
         fc.string({ minLength: 10, maxLength: 100 }),
-        fc.string({ minLength: 10, maxLength: 100 }),
-        async (refreshToken, newAccessToken, newRefreshToken) => {
+        async (newAccessToken, newRefreshToken) => {
           vi.mocked(getAccessToken).mockReturnValue(null);
-          vi.mocked(getRefreshToken).mockReturnValue(refreshToken);
 
+          // Cookie-based refresh — no token argument
           const refreshFn = vi.fn().mockResolvedValue({
             access_token: newAccessToken,
             refresh_token: newRefreshToken,
@@ -231,12 +222,11 @@ describe('Preservation: authenticated 401 → refresh → retry flow', () => {
     );
   });
 
-  // Property-based: for any refresh token, if refresh fails → forceLogout always called
-  it('Property: for any refresh token, failed refresh always triggers forceLogout', async () => {
+  // Property-based: if refresh fails → forceLogout always called
+  it('Property: failed cookie-based refresh always triggers forceLogout', async () => {
     await fc.assert(
-      fc.asyncProperty(fc.string({ minLength: 10, maxLength: 100 }), async (refreshToken) => {
+      fc.asyncProperty(fc.constant(null), async () => {
         vi.mocked(getAccessToken).mockReturnValue(null);
-        vi.mocked(getRefreshToken).mockReturnValue(refreshToken);
 
         const refreshFn = vi.fn().mockRejectedValue(new Error('Refresh failed'));
         setRefreshTokenFn(refreshFn);
@@ -259,7 +249,6 @@ describe('Preservation: authenticated 401 → refresh → retry flow', () => {
 
   it('does not redirect on non-401 responses (req 3.3, 3.4)', async () => {
     vi.mocked(getAccessToken).mockReturnValue(null);
-    vi.mocked(getRefreshToken).mockReturnValue(null);
 
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mock500Response()));
 
@@ -270,5 +259,79 @@ describe('Preservation: authenticated 401 → refresh → retry flow', () => {
     }
 
     expect(hrefSetter).not.toHaveBeenCalledWith('/login');
+  });
+
+  // ── Preservation: Authorization header on protected requests (req 3.10) ────
+
+  it('test_makeAuthRequest_sends_authorization_header: httpClient.get includes Authorization: Bearer header (req 3.10)', async () => {
+    vi.mocked(getAccessToken).mockReturnValue('test-access-token');
+
+    const fetchMock = vi.fn().mockResolvedValue(mock200Response({ id: 'p1' }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await httpClient.get('/api/v1/projects');
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const headers = options.headers as Record<string, string>;
+    expect(headers['Authorization']).toBe('Bearer test-access-token');
+  });
+
+  // ── Preservation: 401 interceptor triggers refresh function (req 3.8) ──────
+
+  it('test_401_interceptor_calls_refresh_fn: 401 on protected call triggers the cookie-based refresh function (req 3.8)', async () => {
+    vi.mocked(getAccessToken).mockReturnValue('expired-access-token');
+
+    // Cookie-based refresh — no token argument
+    const refreshFn = vi.fn().mockResolvedValue({
+      access_token: 'new-access-token',
+      refresh_token: 'new-refresh-token',
+    });
+    setRefreshTokenFn(refreshFn);
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(mock401Response()).mockResolvedValueOnce(mock200Response({}))
+    );
+
+    await httpClient.get('/api/v1/projects');
+
+    // Cookie-based refresh — called with NO arguments
+    expect(refreshFn).toHaveBeenCalledWith();
+  });
+
+  // ── Task 3.7 new tests ────────────────────────────────────────────────────
+
+  it('test_401_interceptor_calls_refresh_without_token_arg: refresh fn called with no arguments', async () => {
+    vi.mocked(getAccessToken).mockReturnValue(null);
+
+    const refreshFn = vi.fn().mockResolvedValue({
+      access_token: 'new-access-token',
+      refresh_token: 'new-refresh-token',
+    });
+    setRefreshTokenFn(refreshFn);
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(mock401Response()).mockResolvedValueOnce(mock200Response({}))
+    );
+
+    await httpClient.get('/api/v1/test');
+
+    // Must be called with zero arguments — cookie is sent automatically by browser
+    expect(refreshFn).toHaveBeenCalledWith();
+    expect(refreshFn.mock.calls[0]).toHaveLength(0);
+  });
+
+  it('test_makeAuthRequest_includes_credentials_include: fetch is called with credentials include', async () => {
+    vi.mocked(getAccessToken).mockReturnValue('test-token');
+
+    const fetchMock = vi.fn().mockResolvedValue(mock200Response({}));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await httpClient.get('/api/v1/projects');
+
+    const [, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(options.credentials).toBe('include');
   });
 });

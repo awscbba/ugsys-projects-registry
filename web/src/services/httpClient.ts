@@ -2,18 +2,19 @@
  * Singleton HTTP client wrapping fetch.
  * - Injects Authorization: Bearer <token> from in-memory authStore (not localStorage)
  * - Adds X-Request-ID (UUID v4) on every request
- * - 401 interceptor: refresh once → retry → force logout on failure
+ * - 401 interceptor: refresh once (cookie-based) → retry → force logout on failure
  * - Unwraps { data, meta } envelope on success
  * - Throws Error with user-facing message on failure (checks message, then detail)
  * - 15-second timeout via AbortController
  */
 
-import { getAccessToken, getRefreshToken, setTokens, clearTokens } from '../stores/authStore';
+import { getAccessToken, setTokens, clearTokens } from '../stores/authStore';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 const TIMEOUT_MS = 15_000;
 
-type RefreshFn = (token: string) => Promise<{ access_token: string; refresh_token: string }>;
+// No token argument — refresh is cookie-based (httpOnly cookie sent automatically)
+type RefreshFn = () => Promise<{ access_token: string; refresh_token: string }>;
 
 let _refreshTokenFn: RefreshFn | null = null;
 
@@ -99,6 +100,7 @@ async function request<T>(
   method: string,
   path: string,
   body?: unknown,
+  extraOptions?: RequestInit,
   isRetry = false
 ): Promise<T> {
   const token = getAccessToken();
@@ -107,6 +109,8 @@ async function request<T>(
   const options: RequestInit = {
     method,
     headers: buildHeaders(token),
+    credentials: 'include', // always send cookies cross-subdomain
+    ...extraOptions,
   };
 
   if (body !== undefined) {
@@ -116,18 +120,18 @@ async function request<T>(
   const response = await fetchWithTimeout(url, options);
 
   if (response.status === 401 && !isRetry) {
-    const refreshToken = getRefreshToken();
-    if (refreshToken && _refreshTokenFn) {
+    if (_refreshTokenFn) {
       try {
-        const tokens = await _refreshTokenFn(refreshToken);
-        setTokens(tokens.access_token, tokens.refresh_token);
-        return request<T>(method, path, body, true);
+        // Cookie-based refresh — no token argument needed
+        const tokens = await _refreshTokenFn();
+        setTokens(tokens.access_token);
+        return request<T>(method, path, body, extraOptions, true);
       } catch {
         forceLogout();
         throw new Error('Session expired. Please log in again.');
       }
     } else {
-      if (getAccessToken() !== null || getRefreshToken() !== null) {
+      if (getAccessToken() !== null) {
         forceLogout();
       }
       throw new Error('Session expired. Please log in again.');
@@ -142,6 +146,7 @@ async function requestRaw<T>(
   method: string,
   path: string,
   body?: unknown,
+  extraOptions?: RequestInit,
   isRetry = false
 ): Promise<T> {
   const token = getAccessToken();
@@ -150,6 +155,8 @@ async function requestRaw<T>(
   const options: RequestInit = {
     method,
     headers: buildHeaders(token),
+    credentials: 'include',
+    ...extraOptions,
   };
 
   if (body !== undefined) {
@@ -159,18 +166,17 @@ async function requestRaw<T>(
   const response = await fetchWithTimeout(url, options);
 
   if (response.status === 401 && !isRetry) {
-    const refreshToken = getRefreshToken();
-    if (refreshToken && _refreshTokenFn) {
+    if (_refreshTokenFn) {
       try {
-        const tokens = await _refreshTokenFn(refreshToken);
-        setTokens(tokens.access_token, tokens.refresh_token);
-        return requestRaw<T>(method, path, body, true);
+        const tokens = await _refreshTokenFn();
+        setTokens(tokens.access_token);
+        return requestRaw<T>(method, path, body, extraOptions, true);
       } catch {
         forceLogout();
         throw new Error('Session expired. Please log in again.');
       }
     } else {
-      if (getAccessToken() !== null || getRefreshToken() !== null) {
+      if (getAccessToken() !== null) {
         forceLogout();
       }
       throw new Error('Session expired. Please log in again.');
@@ -198,6 +204,7 @@ export async function makeAuthRequest<T>(
       'Content-Type': 'application/json',
       'X-Request-ID': crypto.randomUUID(),
     },
+    credentials: 'include', // send cookies to identity-manager cross-subdomain
   };
   if (body !== undefined) {
     options.body = JSON.stringify(body);
@@ -207,28 +214,28 @@ export async function makeAuthRequest<T>(
 }
 
 export const httpClient = {
-  get<T>(path: string): Promise<T> {
-    return request<T>('GET', path);
+  get<T>(path: string, extraOptions?: RequestInit): Promise<T> {
+    return request<T>('GET', path, undefined, extraOptions);
   },
 
   /** Like get(), but returns the full { data, meta } envelope without unwrapping. */
-  getRaw<T>(path: string): Promise<T> {
-    return requestRaw<T>('GET', path);
+  getRaw<T>(path: string, extraOptions?: RequestInit): Promise<T> {
+    return requestRaw<T>('GET', path, undefined, extraOptions);
   },
 
-  post<T>(path: string, body?: unknown): Promise<T> {
-    return request<T>('POST', path, body);
+  post<T>(path: string, body?: unknown, extraOptions?: RequestInit): Promise<T> {
+    return request<T>('POST', path, body, extraOptions);
   },
 
-  put<T>(path: string, body?: unknown): Promise<T> {
-    return request<T>('PUT', path, body);
+  put<T>(path: string, body?: unknown, extraOptions?: RequestInit): Promise<T> {
+    return request<T>('PUT', path, body, extraOptions);
   },
 
-  patch<T>(path: string, body?: unknown): Promise<T> {
-    return request<T>('PATCH', path, body);
+  patch<T>(path: string, body?: unknown, extraOptions?: RequestInit): Promise<T> {
+    return request<T>('PATCH', path, body, extraOptions);
   },
 
-  delete<T>(path: string): Promise<T> {
-    return request<T>('DELETE', path);
+  delete<T>(path: string, extraOptions?: RequestInit): Promise<T> {
+    return request<T>('DELETE', path, undefined, extraOptions);
   },
 };
