@@ -1,50 +1,70 @@
-import { LoginForm } from '../components/auth/LoginForm';
+import { useState } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { LoginCard } from '@ugsys/ui-lib';
+import { login } from '../stores/authStore';
+import { ForgotPasswordModal } from '../components/auth/ForgotPasswordModal';
 
+/**
+ * LoginPage — delegates card rendering to LoginCard from @ugsys/ui-lib.
+ * Owns: auth state, redirect logic, forgot-password modal trigger.
+ */
 export function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showForgot, setShowForgot] = useState(false);
+
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    try {
+      await login(email, password);
+      const redirect = searchParams.get('redirect') ?? '/';
+      navigate(redirect, { replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Credenciales inválidas');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-16">
-      {/* Subtle radial glow behind the card */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          background:
-            'radial-gradient(ellipse 60% 40% at 50% 40%, rgba(255,153,0,0.06) 0%, transparent 70%)',
-        }}
+    <>
+      <LoginCard
+        title="AWS User Group Cbba"
+        emailLabel="Correo electrónico"
+        passwordLabel="Contraseña"
+        submitLabel="Iniciar sesión"
+        loadingLabel="Ingresando..."
+        email={email}
+        password={password}
+        isLoading={isLoading}
+        error={error}
+        onEmailChange={setEmail}
+        onPasswordChange={setPassword}
+        onSubmit={handleSubmit}
+        footer={
+          <div className="flex items-center justify-between text-sm">
+            <Link to="/register" className="text-[#FF9900] hover:text-[#ffb84d] transition-colors">
+              Crear cuenta
+            </Link>
+            <button
+              type="button"
+              onClick={() => setShowForgot(true)}
+              className="text-white/40 hover:text-white/60 transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+        }
       />
 
-      <div className="relative w-full max-w-md">
-        {/* Card */}
-        <div
-          className="
-            rounded-2xl p-8
-            bg-[#1e2738] border border-white/[0.08]
-            shadow-[0_8px_48px_rgba(0,0,0,0.5)]
-          "
-        >
-          {/* Brand mark */}
-          <div className="flex justify-center mb-6">
-            <span
-              className="text-2xl font-bold tracking-tight"
-              style={{
-                background: 'linear-gradient(135deg, #FF9900 0%, #ffb84d 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              AWS User Group Cbba
-            </span>
-          </div>
-
-          <h1 className="mb-1 text-center text-xl font-semibold text-white/90">Iniciar sesión</h1>
-          <p className="mb-7 text-center text-sm text-white/40">
-            Accede a tu cuenta para gestionar proyectos
-          </p>
-
-          <LoginForm />
-        </div>
-      </div>
-    </div>
+      <ForgotPasswordModal isOpen={showForgot} onClose={() => setShowForgot(false)} />
+    </>
   );
 }
