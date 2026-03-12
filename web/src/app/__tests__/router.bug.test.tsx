@@ -66,7 +66,11 @@ vi.mock('@ugsys/ui-lib', () => ({
       </label>
       <label>
         {passwordLabel}
-        <input type="password" value={password} onChange={(e) => onPasswordChange(e.target.value)} />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => onPasswordChange(e.target.value)}
+        />
       </label>
       <button type="submit" disabled={isLoading}>
         {isLoading ? loadingLabel : submitLabel}
