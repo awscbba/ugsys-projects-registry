@@ -57,6 +57,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
+        # Pass OPTIONS preflight requests straight through — rate limiting them
+        # causes BaseHTTPMiddleware to wrap the response before CORSMiddleware can
+        # set Access-Control-Allow-Credentials, resulting in an empty header value.
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         key = _get_client_key(request)
         now = time.monotonic()
         tokens, last_refill = _buckets[key]
