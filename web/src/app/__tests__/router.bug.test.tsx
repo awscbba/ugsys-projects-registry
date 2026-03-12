@@ -29,6 +29,55 @@ vi.mock('@ugsys/ui-lib', () => ({
     </div>
   ),
   Footer: () => <footer>Footer</footer>,
+  LoginCard: ({
+    title,
+    emailLabel = 'Email',
+    passwordLabel = 'Password',
+    submitLabel = 'Sign in',
+    loadingLabel = 'Signing in…',
+    email,
+    password,
+    isLoading,
+    error,
+    onEmailChange,
+    onPasswordChange,
+    onSubmit,
+    footer,
+  }: {
+    title: string;
+    emailLabel?: string;
+    passwordLabel?: string;
+    submitLabel?: string;
+    loadingLabel?: string;
+    email: string;
+    password: string;
+    isLoading: boolean;
+    error: string | null;
+    onEmailChange: (v: string) => void;
+    onPasswordChange: (v: string) => void;
+    onSubmit: (e: React.FormEvent) => void;
+    footer?: React.ReactNode;
+  }) => (
+    <form onSubmit={onSubmit} aria-label={title}>
+      {error && <p role="alert">{error}</p>}
+      <label>
+        {emailLabel}
+        <input type="email" value={email} onChange={(e) => onEmailChange(e.target.value)} />
+      </label>
+      <label>
+        {passwordLabel}
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => onPasswordChange(e.target.value)}
+        />
+      </label>
+      <button type="submit" disabled={isLoading}>
+        {isLoading ? loadingLabel : submitLabel}
+      </button>
+      {footer}
+    </form>
+  ),
 }));
 
 vi.mock('../../hooks/useAuth', () => ({
