@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { ThemeProvider } from '@ugsys/ui-lib';
 import App from './app/App';
 import { initializeAuth } from './stores/authStore';
 import './index.css';
@@ -14,7 +15,9 @@ if (!rootElement) {
 } else {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </React.StrictMode>
   );
 }
