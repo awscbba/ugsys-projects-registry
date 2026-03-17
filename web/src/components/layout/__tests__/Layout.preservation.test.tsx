@@ -45,6 +45,7 @@ vi.mock('@ugsys/ui-lib', () => ({
     </div>
   ),
   Footer: () => <footer>Footer</footer>,
+  useTheme: () => ({ theme: 'light', toggleTheme: vi.fn() }),
 }));
 
 vi.mock('../../../hooks/useAuth', () => ({
