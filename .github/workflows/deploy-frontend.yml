@@ -6,20 +6,16 @@ on:
       - main
     paths:
       - "web/**"
+      - ".github/workflows/deploy-frontend.yml"
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: web
-
 jobs:
-  deploy:
-    name: Build & Deploy to S3 + CloudFront
+  # ──────────────────────────────────────────────────────────────────────────
+  # Build registry SPA (web/)
+  # ──────────────────────────────────────────────────────────────────────────
+  build-spa:
+    name: Build Registry SPA
     runs-on: ubuntu-latest
-    environment: prod
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -31,34 +27,115 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: web/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        working-directory: web
 
       - name: Build
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_AUTH_API_URL: ${{ secrets.VITE_AUTH_API_URL }}
         run: pnpm run build
+        working-directory: web
 
+      - name: Upload SPA dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: registry-spa-dist-${{ github.sha }}
+          path: web/dist/
+          retention-days: 1
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Build projects-plugin IIFE bundle (from ugsys-admin-panel)
+  # ──────────────────────────────────────────────────────────────────────────
+  build-plugin:
+    name: Build Projects Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ugsys-admin-panel
+        uses: actions/checkout@v4
+        with:
+          repository: awscbba/ugsys-admin-panel
+          ref: main
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: projects-plugin/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: projects-plugin
+
+      - name: Build plugin bundle
+        run: pnpm run build
+        working-directory: projects-plugin
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: projects-plugin-dist-${{ github.sha }}
+          path: projects-plugin/dist/projects-plugin.js
+          retention-days: 1
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Deploy — sync S3 + invalidate CloudFront
+  # ──────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to S3 + CloudFront
+    runs-on: ubuntu-latest
+    needs: [build-spa, build-plugin]
+    environment: prod
+    permissions:
+      id-token: write
+      contents: read
+    steps:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
-      - name: Sync dist/ to S3
+      - name: Download SPA dist
+        uses: actions/download-artifact@v4
+        with:
+          name: registry-spa-dist-${{ github.sha }}
+          path: web/dist/
+
+      - name: Download plugin dist
+        uses: actions/download-artifact@v4
+        with:
+          name: projects-plugin-dist-${{ github.sha }}
+          path: plugin-dist/
+
+      - name: Sync SPA assets to S3 (long-lived cache)
         run: |
-          # Sync hashed assets with long-lived cache (1 year immutable)
-          aws s3 sync dist/assets/ s3://${{ secrets.FRONTEND_BUCKET_NAME }}/assets/ \
+          aws s3 sync web/dist/assets/ s3://${{ secrets.FRONTEND_BUCKET_NAME }}/assets/ \
             --cache-control "public, max-age=31536000, immutable" \
             --delete
 
-          # Sync everything else with no-cache (HTML, manifest, etc.)
-          aws s3 sync dist/ s3://${{ secrets.FRONTEND_BUCKET_NAME }}/ \
+      - name: Sync SPA root files to S3 (no cache)
+        run: |
+          aws s3 sync web/dist/ s3://${{ secrets.FRONTEND_BUCKET_NAME }}/ \
             --exclude "assets/*" \
             --cache-control "no-store, no-cache, must-revalidate" \
             --delete
+
+      - name: Upload plugin bundle to S3 (no cache — stable path)
+        run: |
+          aws s3 cp plugin-dist/projects-plugin.js \
+            s3://${{ secrets.FRONTEND_BUCKET_NAME }}/plugins/projects-plugin.js \
+            --cache-control "no-store, no-cache, must-revalidate" \
+            --content-type "application/javascript"
 
       - name: Invalidate CloudFront cache
         run: |
@@ -66,25 +143,66 @@ jobs:
             --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
 
-      - name: Notify Slack — success
-        if: success()
-        uses: slackapi/slack-github-action@v1
+  # ──────────────────────────────────────────────────────────────────────────
+  # Notify
+  # ──────────────────────────────────────────────────────────────────────────
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: always()
+    steps:
+      - name: Slack — success
+        if: needs.deploy.result == 'success'
+        continue-on-error: true
+        uses: slackapi/slack-github-action@v2.0.0
         with:
-          channel-id: "C0AE6QV0URH"
-          slack-message: |
-            :white_check_mark: *Frontend deployed* to `registry.apps.cloud.org.bo`
-            Commit: `${{ github.sha }}`
-            ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            {
+              "channel": "C0AE6QV0URH",
+              "username": "ugsys CI/CD",
+              "icon_emoji": ":white_check_mark:",
+              "text": "✅ Frontend deployed — registry.apps.cloud.org.bo",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {"type": "plain_text", "text": "✅ Frontend deployed — ugsys-projects-registry", "emoji": true}
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {"type": "mrkdwn", "text": "*By:*\n${{ github.actor }}"},
+                    {"type": "mrkdwn", "text": "*Commit:*\n${{ github.sha }}"}
+                  ]
+                }
+              ]
+            }
 
-      - name: Notify Slack — failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1
+      - name: Slack — failure
+        if: needs.deploy.result != 'success'
+        continue-on-error: true
+        uses: slackapi/slack-github-action@v2.0.0
         with:
-          channel-id: "C0AE6QV0URH"
-          slack-message: |
-            :x: *Frontend deploy failed* on `${{ github.repository }}`
-            Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            {
+              "channel": "C0AE6QV0URH",
+              "username": "ugsys CI/CD",
+              "icon_emoji": ":x:",
+              "text": "❌ Frontend deploy failed — ugsys-projects-registry",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {"type": "plain_text", "text": "❌ Frontend deploy failed — ugsys-projects-registry", "emoji": true}
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {"type": "mrkdwn", "text": "*Run:*\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>"}
+                  ]
+                }
+              ]
+            }
