@@ -17,7 +17,7 @@ async def get_plugin_manifest() -> dict[str, object]:
     return {
         "name": "projects-registry",
         "version": "0.1.0",
-        "entryPoint": "https://registry.apps.cloud.org.bo/assets/index-z0tV6sve.js",
+        "entryPoint": "https://registry.apps.cloud.org.bo/plugins/projects-plugin.js",
         "healthEndpoint": "/health",
         "routes": [
             {
