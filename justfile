@@ -84,7 +84,7 @@ web-format-check:
 
 # Run frontend tests (single run, no watch)
 web-test:
-    cd web && npm run test:run
+    cd web && pnpm run test
 
 # Run frontend tests with coverage
 web-coverage:
@@ -92,4 +92,4 @@ web-coverage:
 
 # Run npm audit at high severity
 web-audit:
-    cd web && npm audit --audit-level=high
+    cd web && pnpm audit --audit-level=high
