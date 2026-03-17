@@ -71,6 +71,7 @@ from src.presentation.api.v1 import (
     form_submissions,
     health,
     images,
+    plugin_manifest,
     projects,
     public,
     subscriptions,
@@ -280,6 +281,7 @@ def create_app() -> FastAPI:
 
     # ── Routers ───────────────────────────────────────────────────────────────
     app.include_router(health.router)
+    app.include_router(plugin_manifest.router)
     app.include_router(projects.router, prefix="/api/v1")
     app.include_router(subscriptions.router, prefix="/api/v1")
     app.include_router(public.router, prefix="/api/v1")
