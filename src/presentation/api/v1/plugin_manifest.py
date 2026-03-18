@@ -21,17 +21,17 @@ async def get_plugin_manifest() -> dict[str, object]:
         "healthEndpoint": "/health",
         "routes": [
             {
-                "path": "/projects",
+                "path": "/app/projects-registry/projects",
                 "label": "Projects",
                 "requiredRoles": ["admin", "super_admin"],
             },
             {
-                "path": "/subscriptions",
+                "path": "/app/projects-registry/subscriptions",
                 "label": "Subscriptions",
                 "requiredRoles": ["admin", "super_admin"],
             },
             {
-                "path": "/form-schemas",
+                "path": "/app/projects-registry/form-schemas",
                 "label": "Form Schemas",
                 "requiredRoles": ["admin", "super_admin"],
             },
@@ -40,7 +40,7 @@ async def get_plugin_manifest() -> dict[str, object]:
             {
                 "label": "Projects",
                 "icon": "📁",
-                "path": "/projects",
+                "path": "/app/projects-registry/projects",
                 "group": "Registry",
                 "order": 1,
                 "requiredRoles": ["admin", "super_admin"],
@@ -48,7 +48,7 @@ async def get_plugin_manifest() -> dict[str, object]:
             {
                 "label": "Subscriptions",
                 "icon": "👥",
-                "path": "/subscriptions",
+                "path": "/app/projects-registry/subscriptions",
                 "group": "Registry",
                 "order": 2,
                 "requiredRoles": ["admin", "super_admin"],
@@ -56,7 +56,7 @@ async def get_plugin_manifest() -> dict[str, object]:
             {
                 "label": "Form Schemas",
                 "icon": "📋",
-                "path": "/form-schemas",
+                "path": "/app/projects-registry/form-schemas",
                 "group": "Registry",
                 "order": 3,
                 "requiredRoles": ["admin", "super_admin"],
