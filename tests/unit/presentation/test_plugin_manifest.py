@@ -106,9 +106,9 @@ class TestPluginManifestEndpoint:
     async def test_route_entries_exist(self, manifest_response) -> None:
         body = manifest_response.json()
         route_paths = [r["path"] for r in body["routes"]]
-        assert "/projects" in route_paths
-        assert "/subscriptions" in route_paths
-        assert "/form-schemas" in route_paths
+        assert "/app/projects-registry/projects" in route_paths
+        assert "/app/projects-registry/subscriptions" in route_paths
+        assert "/app/projects-registry/form-schemas" in route_paths
         assert "/users" not in route_paths  # owned by user-profile-service
 
     async def test_navigation_entries(self, manifest_response) -> None:
