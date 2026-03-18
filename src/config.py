@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import json
+import os
 from typing import Any
 
+import boto3
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -176,5 +179,37 @@ class Settings(BaseSettings):
                 bool(config["subscription_approval_required"]),
             )
 
+
+def _resolve_im_client_secret() -> None:
+    """
+    Resolve the Identity Manager S2S client secret at cold-start.
+
+    Priority:
+      1. IDENTITY_MANAGER_CLIENT_SECRET env var (local dev / CI)
+      2. IDENTITY_MANAGER_CLIENT_SECRET_ARN env var → fetch from Secrets Manager (prod Lambda)
+         Secret schema: { "client_secret": "<plaintext>" }
+      3. No-op — IDENTITY_MANAGER_CLIENT_SECRET stays empty; S2S calls will fail with 400.
+
+    Injects the resolved value into IDENTITY_MANAGER_CLIENT_SECRET so pydantic-settings
+    picks it up when Settings() is instantiated below.
+    """
+    if os.environ.get("IDENTITY_MANAGER_CLIENT_SECRET"):
+        return  # already set — nothing to do
+
+    secret_arn = os.environ.get("IDENTITY_MANAGER_CLIENT_SECRET_ARN", "")
+    if not secret_arn:
+        return
+
+    region = os.environ.get("AWS_REGION", "us-east-1")
+    client = boto3.client("secretsmanager", region_name=region)
+    response = client.get_secret_value(SecretId=secret_arn)
+    parsed: dict[str, str] = json.loads(response.get("SecretString", "{}"))
+    secret_value = parsed.get("client_secret", "")
+    if secret_value:
+        os.environ["IDENTITY_MANAGER_CLIENT_SECRET"] = secret_value
+
+
+# Resolved once at Lambda cold-start — before Settings() is instantiated.
+_resolve_im_client_secret()
 
 settings = Settings()
